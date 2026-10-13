@@ -1,0 +1,23 @@
+{
+  "name": "@nemi-fi/v1-sdk",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "exports": "./src/index.ts",
+  "scripts": {
+    "test:runtime": "vitest run --pass-with-no-tests",
+    "test:static": "tsc --noEmit --emitDeclarationOnly false && prettier --check .",
+    "test:static:fix": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@aztec/foundation": "catalog:",
+    "@uniswap/sdk-core": "catalog:",
+    "jsbi": "^3.2.5",
+    "tiny-invariant": "^1.3.3"
+  }
+}

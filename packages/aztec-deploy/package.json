@@ -1,0 +1,51 @@
+{
+  "name": "@nemi-fi/aztec-deploy",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "default": "./src/exports/index.ts"
+    },
+    "./*": {
+      "default": "./src/exports/*.ts"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "default": "./dist/exports/index.js",
+        "types": "./dist/exports/index.d.ts"
+      },
+      "./*": {
+        "default": "./dist/exports/*.js",
+        "types": "./dist/exports/*.d.ts"
+      }
+    },
+    "access": "restricted"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "test:runtime": "vitest run --pass-with-no-tests",
+    "test:static": "tsc --noEmit --emitDeclarationOnly false && prettier --check .",
+    "test:static:fix": "prettier --write ."
+  },
+  "dependencies": {
+    "@aztec/aztec.js": "catalog:",
+    "@aztec/stdlib": "catalog:",
+    "@nemi-fi/utils": "workspace:*",
+    "json-stringify-deterministic": "catalog:",
+    "lodash-es": "catalog:",
+    "ts-essentials": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

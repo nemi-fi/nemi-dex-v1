@@ -1,0 +1,31 @@
+{
+  "name": "@nemi-fi/bench",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "bench": "tsx src/bench.ts",
+    "test:runtime": "vitest run --pass-with-no-tests",
+    "test:static": "tsc --noEmit --emitDeclarationOnly false && prettier --check .",
+    "test:static:fix": "prettier --write ."
+  },
+  "dependencies": {
+    "@aztec/accounts": "catalog:",
+    "@aztec/aztec.js": "catalog:",
+    "@aztec/pxe": "catalog:",
+    "@aztec/stdlib": "catalog:",
+    "@aztec/wallet-sdk": "catalog:",
+    "@aztec/wallets": "catalog:",
+    "@nemi-fi/contracts": "workspace:*",
+    "@nemi-fi/utils": "workspace:*",
+    "@nemi-fi/v1-sdk": "workspace:*",
+    "lodash-es": "catalog:",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "catalog:",
+    "prettier": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

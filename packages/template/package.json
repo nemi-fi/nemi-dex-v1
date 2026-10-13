@@ -1,0 +1,30 @@
+{
+  "name": "@nemi-fi/package-template",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "exports": "./src/index.ts",
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "default": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    },
+    "access": "restricted"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "test:runtime": "vitest run --pass-with-no-tests",
+    "test:static": "tsc --noEmit --emitDeclarationOnly false && prettier --check .",
+    "test:static:fix": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

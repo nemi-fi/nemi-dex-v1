@@ -1,0 +1,47 @@
+{
+  "3038323768": [
+    {
+      "address": "0x2beed2896b6a9c39a0a4ded660d943c76ebd76cc4977f5b3a8e276cfd6659bf8",
+      "chainId": 3038323768,
+      "decimals": 9,
+      "name": "Aave",
+      "symbol": "AAVE"
+    },
+    {
+      "address": "0x021898a89cda39200487afc95db309f0e1637dbeff943f82f34114a5406f2372",
+      "chainId": 3038323768,
+      "decimals": 8,
+      "name": "Bitcoin",
+      "symbol": "BTC"
+    },
+    {
+      "address": "0x020425a6d7319ebce74968e77760378f0656c0c94cd9654fb26889fb5344938d",
+      "chainId": 3038323768,
+      "decimals": 9,
+      "name": "Dai Stablecoin",
+      "symbol": "DAI"
+    },
+    {
+      "address": "0x1bd7bed97565530867fe68b3f70326b68d181b4339e73e44acbfd7cf0f363a82",
+      "chainId": 3038323768,
+      "decimals": 9,
+      "name": "Ethereum",
+      "symbol": "ETH"
+    },
+    {
+      "address": "0x2ddcb10b641147616162658a86a9b707761118f01c8b69818eb72873f0757bff",
+      "chainId": 3038323768,
+      "decimals": 9,
+      "name": "Solana",
+      "symbol": "SOL"
+    },
+    {
+      "address": "0x213a0c4a661b3d4f2705f22e52d8d2ddb8d735491bedd7e01246a8d064f25b2c",
+      "chainId": 3038323768,
+      "decimals": 9,
+      "name": "Uniswap",
+      "symbol": "UNI"
+    }
+  ],
+  "850140444": []
+}

@@ -1,0 +1,20 @@
+{
+  "pool_manager-PoolManager.json": {
+    "artifactHash": "0x08be392a75f450332936c70c761ed4f000b1884297e7f51a5d5014936378ea44",
+    "id": "0x1b1be37112f247b11cb73c6bc805562d9686e97eaf74206c23396a55328ec97b",
+    "packedBytecode": 13986,
+    "privateFunctions": 5,
+    "privateFunctionsRoot": "0x0d047703daf281118126fe4c617605c31f1163cc6cbb13f523e227a2aef35a45",
+    "publicBytecodeCommitment": "0x25971eb7704138a18f23e241927d8e07193ef028f0f6e418b534bf01df73c475",
+    "version": 1
+  },
+  "token_contract-Token.json": {
+    "artifactHash": "0x26ecbb44dab272751e629b761b634877e387094c20a3e388bac00e74cf4f276d",
+    "id": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+    "packedBytecode": 20747,
+    "privateFunctions": 9,
+    "privateFunctionsRoot": "0x0ae9d83742cf317e88650b321c29412f45d484968643ade70976f60472b98a40",
+    "publicBytecodeCommitment": "0x22120d9d1eabc593315bd38722b2f32b6afd80e68eacd59828a8588ee2a688d8",
+    "version": 1
+  }
+}

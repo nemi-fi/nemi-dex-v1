@@ -1,0 +1,219 @@
+diff --git a/dest/index.js b/dest/index.js
+index 9188e162ef28c6797ddb5eff4f4d6df5eb683ccd..b1c4612d4dd19b1dc82e4a31969c584de588ec31 100644
+--- a/dest/index.js
++++ b/dest/index.js
+@@ -1,28 +1,97 @@
++import vendoredInit from '../vendor/jswasm/sqlite3.mjs';
+ /**
+- * Re-exports sqlite3mc's ES module default (sqlite3InitModule) and the TypeScript types expected by downstream
+- * consumers. Mirrors the `@sqlite.org/sqlite-wasm` package default export — sqlite3mc is a strict API-compatible
+- * superset, so upstream types apply unchanged.
++ * Bundler-visible static reference to the wasm binary. Because the URL argument is a string literal, bundlers detect
++ * the expression, emit the wasm as an asset, and rewrite the URL, so the default `locateFile` below resolves to the
++ * emitted asset instead of guessing a path relative to the (relocated) output chunk at runtime.
++ */ export const SQLITE3_WASM_URL = new URL('../vendor/jswasm/sqlite3.wasm', import.meta.url);
++/**
++ * Initializes the sqlite3mc wasm module.
++ *
++ * With no options, the wasm is fetched from {@link SQLITE3_WASM_URL}, which bundlers rewrite to their emitted asset,
++ * so bundled consumers work by default. Pass `locateFile`, `wasmBinary`, or `instantiateWasm` to override.
+  *
+- * BUNDLER COMPATIBILITY: SQLite3MultipleCiphers 2.3.5 stopped shipping the `-bundler-friendly` build variant, so
+- * this entry re-exports the plain `sqlite3.mjs`. That loader always resolves `sqlite3.wasm` through its
+- * `Module['locateFile']` hook, which computes `new URL(path, import.meta.url)` with a *dynamic* `path` — invisible
+- * to bundlers, so bundled consumers request an unhashed `sqlite3.wasm` relative to the emitted chunk and 404 at
+- * runtime (pre-2.3.5, the bundler-friendly variant carried a statically-analyzable reference instead). To stay
+- * bundler-friendly we wrap the init and inject `emscriptenLocateFile` — the vendored loader's supported escape
+- * hatch (`Module['locateFile']` defers to it when present on the init-module state) — resolving the wasm via a
+- * static `new URL('…/sqlite3.wasm', import.meta.url)` that bundlers detect, emit, and rewrite. Unbundled usage is
+- * unaffected: the static URL resolves to the real vendored path.
+- */ import sqlite3InitModuleUnwrapped from '../vendor/jswasm/sqlite3.mjs';
+-/** Statically analyzable wasm reference: bundlers emit the asset and rewrite this URL to its final location. */ const SQLITE3_WASM_URL = new URL('../vendor/jswasm/sqlite3.wasm', import.meta.url);
+-const sqlite3InitModule = (...args)=>{
+-    // `sqlite3.mjs` creates `globalThis.sqlite3InitModuleState` at import time and the inner Emscripten factory
+-    // captures it (and deletes the global) on init, binding it as `this` of `Module['locateFile']`. Mutate the live
+-    // object; recreate it if a previous init already consumed it (`debugModule` must exist — the factory calls it).
+-    const g = globalThis;
+-    const state = g.sqlite3InitModuleState ??= Object.assign(Object.create(null), {
+-        debugModule: ()=>{}
++ * If loading the wasm fails (unreachable URL, HTTP error, corrupt bytes), the returned promise rejects with the cause.
++ * Exception: failures inside a caller-supplied `instantiateWasm` cannot be observed (Emscripten's hook contract has no
++ * error channel), so with a custom hook the promise never settles on failure.
++ */ export default function sqlite3InitModule(options = {}) {
++    return new Promise((resolve, reject)=>{
++        const instantiateWasm = options.instantiateWasm ?? (options.wasmBinary ? wasmBinaryInstantiator(options.wasmBinary, reject) : urlInstantiator(options.locateFile ?? defaultLocateFile, reject));
++        const callOptions = {
++            ...options,
++            instantiateWasm
++        };
++        installInitModuleState(callOptions);
++        // The vendored init consumes the installed state synchronously (its pre-js runs before the first await), so
++        // interleaved calls cannot observe each other's state. On instantiation failure the vendored promise never
++        // settles (the hook has no error channel), so the instantiators report failure through `reject` instead.
++        vendoredInit(callOptions).then(resolve, reject);
++    });
++}
++/** Builds an Emscripten `instantiateWasm` hook that instantiates the given bytes instead of fetching by URL. */ function wasmBinaryInstantiator(wasmBinary, onFailure) {
++    return (imports, onSuccess)=>{
++        void WebAssembly.instantiate(wasmBinary, imports).then(({ instance, module })=>onSuccess(instance, module), (error)=>onFailure(instantiationError('wasmBinary', error)));
++        return {};
++    };
++}
++/**
++ * Builds an Emscripten `instantiateWasm` hook that fetches and instantiates the wasm from the located URL, replacing
++ * the vendored fallback (which reports failures nowhere). Prefers streaming compilation, falling back to
++ * buffer-based instantiation when streaming is unavailable or fails (e.g. a server responding without the
++ * `application/wasm` MIME type, which `instantiateStreaming` rejects).
++ */ function urlInstantiator(locate, onFailure) {
++    return (imports, onSuccess)=>{
++        const url = locate('sqlite3.wasm', '');
++        const streaming = WebAssembly.instantiateStreaming ? WebAssembly.instantiateStreaming(fetch(url, {
++            credentials: 'same-origin'
++        }), imports).catch(()=>fetchAndInstantiate(url, imports)) : fetchAndInstantiate(url, imports);
++        void streaming.then(({ instance, module })=>onSuccess(instance, module), (error)=>onFailure(instantiationError(url, error)));
++        return {};
++    };
++}
++/** Fetches the wasm and instantiates it from a buffer, surfacing HTTP errors that streaming instantiation obscures. */ async function fetchAndInstantiate(url, imports) {
++    const response = await fetch(url, {
++        credentials: 'same-origin'
+     });
+-    state.emscriptenLocateFile = (path, prefix)=>path === 'sqlite3.wasm' ? SQLITE3_WASM_URL.href : new URL(path, prefix || import.meta.url).href;
+-    return sqlite3InitModuleUnwrapped(...args);
+-};
+-export default sqlite3InitModule;
++    if (!response.ok) {
++        throw new Error(`HTTP ${response.status} ${response.statusText}`.trimEnd());
++    }
++    return WebAssembly.instantiate(await response.arrayBuffer(), imports);
++}
++function instantiationError(source, cause) {
++    const detail = cause instanceof Error ? cause.message : String(cause);
++    return new Error(`sqlite3 wasm instantiation failed (${source}): ${detail}`, {
++        cause
++    });
++}
++/**
++ * Installs the global state object the vendored module's pre-js binds its `Module.locateFile` and
++ * `Module.instantiateWasm` wrappers to.
++ */ function installInitModuleState(options) {
++    const urlParams = globalThis.location?.href ? new URL(globalThis.location.href).searchParams : new URLSearchParams();
++    const debugModule = urlParams.has('sqlite3.debugModule') ? (...args)=>console.warn('sqlite3.debugModule:', ...args) : ()=>{};
++    globalThis.sqlite3InitModuleState = Object.assign(Object.create(null), {
++        debugModule,
++        wasmFilename: 'sqlite3.wasm',
++        emscriptenLocateFile: options.locateFile ?? defaultLocateFile,
++        emscriptenInstantiateWasm: options.instantiateWasm
++    });
++}
++/**
++ * Some bundlers (e.g. Next.js/webpack for worker-loaded modules) inline `import.meta.url` to the
++ * build-time *file* path instead of a runtime URL, so the default wasm resolution yields a
++ * `file://…/sqlite3.wasm` URL the browser refuses to load ("Not allowed to load local resource").
++ * When that happens, resolve the asset from the page/worker origin instead — the app serves the
++ * wasm from its `public/` dir at `/sqlite3.wasm`.
++ */ function sameOriginAsset(path) {
++    const origin = globalThis.location?.origin;
++    return origin ? new URL(path, origin).href : path;
++}
++/** Resolves the wasm to {@link SQLITE3_WASM_URL} so bundled consumers load the bundler-emitted asset by default. */ function defaultLocateFile(path, prefix) {
++    if (path === 'sqlite3.wasm') {
++        return SQLITE3_WASM_URL.href.startsWith('file:')
++            ? sameOriginAsset('sqlite3.wasm')
++            : SQLITE3_WASM_URL.href;
++    }
++    const url = new URL(path, prefix || import.meta.url);
++    return url.protocol === 'file:' ? sameOriginAsset(path) : url.href;
++}
+diff --git a/dest/src/index.d.ts b/dest/src/index.d.ts
+index fc6eccf7e6273c9ec996bd98034861359388ebf2..3ff7308b4ec8d54125fd121dd95d69c29fbfe6f6 100644
+--- a/dest/src/index.d.ts
++++ b/dest/src/index.d.ts
+@@ -1,20 +1,33 @@
++import type { Sqlite3Static } from '@sqlite.org/sqlite-wasm';
++export type { Database, SAHPoolUtil, Sqlite3Static } from '@sqlite.org/sqlite-wasm';
++/**
++ * Bundler-visible static reference to the wasm binary. Because the URL argument is a string literal, bundlers detect
++ * the expression, emit the wasm as an asset, and rewrite the URL, so the default `locateFile` below resolves to the
++ * emitted asset instead of guessing a path relative to the (relocated) output chunk at runtime.
++ */
++export declare const SQLITE3_WASM_URL: URL;
+ /**
+- * Re-exports sqlite3mc's ES module default (sqlite3InitModule) and the TypeScript types expected by downstream
+- * consumers. Mirrors the `@sqlite.org/sqlite-wasm` package default export — sqlite3mc is a strict API-compatible
+- * superset, so upstream types apply unchanged.
++ * Emscripten module-loader options honored by {@link sqlite3InitModule}. Any further options are passed through to the
++ * vendored module unchanged.
++ */
++export interface Sqlite3InitOptions {
++    /** Resolves the URL from which a runtime asset (in practice always `sqlite3.wasm`) is fetched. */
++    locateFile?: (path: string, prefix: string) => string;
++    /** Pre-fetched wasm bytes. When set, the wasm is instantiated directly and never fetched by URL. */
++    wasmBinary?: BufferSource;
++    /** Custom wasm instantiation hook (standard Emscripten contract). Takes precedence over `wasmBinary`. */
++    instantiateWasm?: (imports: WebAssembly.Imports, onSuccess: (instance: WebAssembly.Instance, module: WebAssembly.Module) => void) => object;
++    [key: string]: unknown;
++}
++/**
++ * Initializes the sqlite3mc wasm module.
++ *
++ * With no options, the wasm is fetched from {@link SQLITE3_WASM_URL}, which bundlers rewrite to their emitted asset,
++ * so bundled consumers work by default. Pass `locateFile`, `wasmBinary`, or `instantiateWasm` to override.
+  *
+- * BUNDLER COMPATIBILITY: SQLite3MultipleCiphers 2.3.5 stopped shipping the `-bundler-friendly` build variant, so
+- * this entry re-exports the plain `sqlite3.mjs`. That loader always resolves `sqlite3.wasm` through its
+- * `Module['locateFile']` hook, which computes `new URL(path, import.meta.url)` with a *dynamic* `path` — invisible
+- * to bundlers, so bundled consumers request an unhashed `sqlite3.wasm` relative to the emitted chunk and 404 at
+- * runtime (pre-2.3.5, the bundler-friendly variant carried a statically-analyzable reference instead). To stay
+- * bundler-friendly we wrap the init and inject `emscriptenLocateFile` — the vendored loader's supported escape
+- * hatch (`Module['locateFile']` defers to it when present on the init-module state) — resolving the wasm via a
+- * static `new URL('…/sqlite3.wasm', import.meta.url)` that bundlers detect, emit, and rewrite. Unbundled usage is
+- * unaffected: the static URL resolves to the real vendored path.
++ * If loading the wasm fails (unreachable URL, HTTP error, corrupt bytes), the returned promise rejects with the cause.
++ * Exception: failures inside a caller-supplied `instantiateWasm` cannot be observed (Emscripten's hook contract has no
++ * error channel), so with a custom hook the promise never settles on failure.
+  */
+-import sqlite3InitModuleUnwrapped from '../vendor/jswasm/sqlite3.mjs';
+-declare const sqlite3InitModule: typeof sqlite3InitModuleUnwrapped;
+-export default sqlite3InitModule;
+-export type { Database, SAHPoolUtil, Sqlite3Static } from '@sqlite.org/sqlite-wasm';
+-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguZC50cyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9pbmRleC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTs7Ozs7Ozs7Ozs7Ozs7R0FjRztBQUNILE9BQU8sMEJBQTBCLE1BQU0sOEJBQThCLENBQUM7QUFVdEUsUUFBQSxNQUFNLGlCQUFpQixFQUFFLE9BQU8sMEJBVy9CLENBQUM7QUFFRixlQUFlLGlCQUFpQixDQUFDO0FBQ2pDLFlBQVksRUFBRSxRQUFRLEVBQUUsV0FBVyxFQUFFLGFBQWEsRUFBRSxNQUFNLHlCQUF5QixDQUFDIn0=
+\ No newline at end of file
++export default function sqlite3InitModule(options?: Sqlite3InitOptions): Promise<Sqlite3Static>;
++//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguZC50cyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9pbmRleC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLEtBQUssRUFBRSxhQUFhLEVBQUUsTUFBTSx5QkFBeUIsQ0FBQztBQUk3RCxZQUFZLEVBQUUsUUFBUSxFQUFFLFdBQVcsRUFBRSxhQUFhLEVBQUUsTUFBTSx5QkFBeUIsQ0FBQztBQUVwRjs7OztHQUlHO0FBQ0gsZUFBTyxNQUFNLGdCQUFnQixLQUE0RCxDQUFDO0FBRTFGOzs7R0FHRztBQUNILE1BQU0sV0FBVyxrQkFBa0I7SUFDakMsa0dBQWtHO0lBQ2xHLFVBQVUsQ0FBQyxFQUFFLENBQUMsSUFBSSxFQUFFLE1BQU0sRUFBRSxNQUFNLEVBQUUsTUFBTSxLQUFLLE1BQU0sQ0FBQztJQUN0RCxvR0FBb0c7SUFDcEcsVUFBVSxDQUFDLEVBQUUsWUFBWSxDQUFDO0lBQzFCLHlHQUF5RztJQUN6RyxlQUFlLENBQUMsRUFBRSxDQUNoQixPQUFPLEVBQUUsV0FBVyxDQUFDLE9BQU8sRUFDNUIsU0FBUyxFQUFFLENBQUMsUUFBUSxFQUFFLFdBQVcsQ0FBQyxRQUFRLEVBQUUsTUFBTSxFQUFFLFdBQVcsQ0FBQyxNQUFNLEtBQUssSUFBSSxLQUM1RSxNQUFNLENBQUM7SUFDWixDQUFDLEdBQUcsRUFBRSxNQUFNLEdBQUcsT0FBTyxDQUFDO0NBQ3hCO0FBRUQ7Ozs7Ozs7OztHQVNHO0FBQ0gsTUFBTSxDQUFDLE9BQU8sVUFBVSxpQkFBaUIsQ0FBQyxPQUFPLEdBQUUsa0JBQXVCLEdBQUcsT0FBTyxDQUFDLGFBQWEsQ0FBQyxDQWNsRyJ9
+\ No newline at end of file
+diff --git a/dest/src/index.d.ts.map b/dest/src/index.d.ts.map
+index f18d6f6860ba846877011167c4b48445833923ae..8f61f176f3bac28d92c80ede834b92628ecabf7c 100644
+--- a/dest/src/index.d.ts.map
++++ b/dest/src/index.d.ts.map
+@@ -1 +1 @@
+-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../src/index.ts"],"names":[],"mappings":"AAAA;;;;;;;;;;;;;;GAcG;AACH,OAAO,0BAA0B,MAAM,8BAA8B,CAAC;AAUtE,QAAA,MAAM,iBAAiB,EAAE,OAAO,0BAW/B,CAAC;AAEF,eAAe,iBAAiB,CAAC;AACjC,YAAY,EAAE,QAAQ,EAAE,WAAW,EAAE,aAAa,EAAE,MAAM,yBAAyB,CAAC"}
+\ No newline at end of file
++{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../src/index.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,aAAa,EAAE,MAAM,yBAAyB,CAAC;AAI7D,YAAY,EAAE,QAAQ,EAAE,WAAW,EAAE,aAAa,EAAE,MAAM,yBAAyB,CAAC;AAEpF;;;;GAIG;AACH,eAAO,MAAM,gBAAgB,KAA4D,CAAC;AAE1F;;;GAGG;AACH,MAAM,WAAW,kBAAkB;IACjC,kGAAkG;IAClG,UAAU,CAAC,EAAE,CAAC,IAAI,EAAE,MAAM,EAAE,MAAM,EAAE,MAAM,KAAK,MAAM,CAAC;IACtD,oGAAoG;IACpG,UAAU,CAAC,EAAE,YAAY,CAAC;IAC1B,yGAAyG;IACzG,eAAe,CAAC,EAAE,CAChB,OAAO,EAAE,WAAW,CAAC,OAAO,EAC5B,SAAS,EAAE,CAAC,QAAQ,EAAE,WAAW,CAAC,QAAQ,EAAE,MAAM,EAAE,WAAW,CAAC,MAAM,KAAK,IAAI,KAC5E,MAAM,CAAC;IACZ,CAAC,GAAG,EAAE,MAAM,GAAG,OAAO,CAAC;CACxB;AAED;;;;;;;;;GASG;AACH,MAAM,CAAC,OAAO,UAAU,iBAAiB,CAAC,OAAO,GAAE,kBAAuB,GAAG,OAAO,CAAC,aAAa,CAAC,CAclG"}
+diff --git a/vendor/jswasm/sqlite3.mjs b/vendor/jswasm/sqlite3.mjs
+index 201383424f3b562447b071b84ce5d97bdcfa8fff..25de916640d078ab7b8f24cfb4ce87509272be7c 100644
+--- a/vendor/jswasm/sqlite3.mjs
++++ b/vendor/jswasm/sqlite3.mjs
+@@ -93,7 +93,9 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
+       
+       return this.emscriptenLocateFile(path, prefix);
+     }
+-    return new URL(path, import.meta.url).href;
++    // Bundlers may inline `import.meta.url` to a build-time file: path; the browser refuses to
++    // load a file:// resource, so fall back to the page/worker origin (app serves it from public/).
++    { const u = new URL(path, import.meta.url); if (u.protocol !== 'file:') return u.href; const o = globalThis.location?.origin; return o ? new URL(path, o).href : u.href; }
+   }.bind(sIMS);
+ 
+   
+@@ -394,8 +396,9 @@ function findWasmBinary() {
+     return locateFile('sqlite3.wasm');
+   }
+ 
+-  
+-  return new URL('sqlite3.wasm', import.meta.url).href;
++  // Bundlers may inline `import.meta.url` to a build-time file: path; the browser refuses to load
++  // a file:// resource, so fall back to the page/worker origin (app serves it from public/).
++  { const u = new URL('sqlite3.wasm', import.meta.url); if (u.protocol !== 'file:') return u.href; const o = globalThis.location?.origin; return o ? new URL('sqlite3.wasm', o).href : u.href; }
+ 
+ }
+ 

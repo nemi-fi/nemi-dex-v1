@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+
+    "maxNodeModuleJsDepth": 0 // due to svelte/internal/client missing types
+  }
+}

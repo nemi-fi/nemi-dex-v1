@@ -1,0 +1,36 @@
+{
+  "name": "@nemi-fi/utils",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "test:runtime": "vitest run --pass-with-no-tests",
+    "test:static": "tsc --noEmit --emitDeclarationOnly false && prettier --check .",
+    "test:static:fix": "prettier --write ."
+  },
+  "dependencies": {
+    "@aztec/aztec.js": "catalog:",
+    "@aztec/foundation": "catalog:",
+    "@aztec/stdlib": "catalog:",
+    "@aztec/wallets": "catalog:",
+    "@uniswap/sdk-core": "catalog:",
+    "lodash-es": "catalog:",
+    "ms": "catalog:",
+    "mutexify": "^1.4.0",
+    "svelte": "catalog:",
+    "svelte-persisted-store": "^0.12.0",
+    "ts-essentials": "catalog:",
+    "ufo": "^1.6.4",
+    "viem": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "catalog:",
+    "@types/ms": "catalog:",
+    "@types/mutexify": "^1.2.4",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

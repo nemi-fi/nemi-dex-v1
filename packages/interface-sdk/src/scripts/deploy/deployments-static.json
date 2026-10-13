@@ -1,0 +1,150 @@
+{
+  "3038323768": {
+    "AAVE": {
+      "address": "0x2beed2896b6a9c39a0a4ded660d943c76ebd76cc4977f5b3a8e276cfd6659bf8",
+      "currentContractClassId": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+      "deployer": "0x28e554317605d261fb45652e9cde3a32d6c8fa6d2ae67a9af78a3f88429889c1",
+      "immutablesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "initializationHash": "0x1480fa73edc534910e1e4764ff8233c4b30cdd1153a8d18d8805121bfb859c47",
+      "originalContractClassId": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+      "publicKeys": {
+        "fbpkMHash": "0x0f124f07811eebfaaa6d31316a2cc5bf255fa118f720e8ff1f2fc0d4aa46d496",
+        "ivpkM": "0x00c044b05b6ca83b9c2dbae79cc1135155956a64e136819136e9947fe5e5866c1c1f0ca244c7cd46b682552bff8ae77dea40b966a71de076ec3b7678f2bdb151",
+        "mspkMHash": "0x14a5d4bde495b8c3a9ba4aed0d4870526e46fdff22d341a2f689ac5a50d10356",
+        "npkMHash": "0x14fbaeaeddaa69be81d404c684e78e9f1a786d225faf8de2ce97c92f67d89a26",
+        "ovpkMHash": "0x0e60ed663a4da5636e2e25a1f1f0c5b27c011c8eaed22bbe61e2a0fd875dd24b",
+        "tpkMHash": "0x082c6d164b0ba073c9dd911100248c8ecd80b03f82f38531856a3c16dadcbef0"
+      },
+      "salt": "0x01499414e8f21141e726d52d62ce55d4551b1d5b3452f68782af143dfc922b55",
+      "version": 2
+    },
+    "BTC": {
+      "address": "0x021898a89cda39200487afc95db309f0e1637dbeff943f82f34114a5406f2372",
+      "currentContractClassId": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+      "deployer": "0x28e554317605d261fb45652e9cde3a32d6c8fa6d2ae67a9af78a3f88429889c1",
+      "immutablesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "initializationHash": "0x0135f8899de7a84583efe68cf9820540fdd52138c9e2ae05b0addcd72fae0d69",
+      "originalContractClassId": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+      "publicKeys": {
+        "fbpkMHash": "0x0f124f07811eebfaaa6d31316a2cc5bf255fa118f720e8ff1f2fc0d4aa46d496",
+        "ivpkM": "0x00c044b05b6ca83b9c2dbae79cc1135155956a64e136819136e9947fe5e5866c1c1f0ca244c7cd46b682552bff8ae77dea40b966a71de076ec3b7678f2bdb151",
+        "mspkMHash": "0x14a5d4bde495b8c3a9ba4aed0d4870526e46fdff22d341a2f689ac5a50d10356",
+        "npkMHash": "0x14fbaeaeddaa69be81d404c684e78e9f1a786d225faf8de2ce97c92f67d89a26",
+        "ovpkMHash": "0x0e60ed663a4da5636e2e25a1f1f0c5b27c011c8eaed22bbe61e2a0fd875dd24b",
+        "tpkMHash": "0x082c6d164b0ba073c9dd911100248c8ecd80b03f82f38531856a3c16dadcbef0"
+      },
+      "salt": "0x111f5a63b1ef66249ff81ecae71820327a3e527dc1e4ffe04e312943576e265e",
+      "version": 2
+    },
+    "DAI": {
+      "address": "0x020425a6d7319ebce74968e77760378f0656c0c94cd9654fb26889fb5344938d",
+      "currentContractClassId": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+      "deployer": "0x28e554317605d261fb45652e9cde3a32d6c8fa6d2ae67a9af78a3f88429889c1",
+      "immutablesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "initializationHash": "0x0af7894e66341313cb6ff416d02de52f9868ad2b827fdeb4eaa9b1846dc36cc0",
+      "originalContractClassId": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+      "publicKeys": {
+        "fbpkMHash": "0x0f124f07811eebfaaa6d31316a2cc5bf255fa118f720e8ff1f2fc0d4aa46d496",
+        "ivpkM": "0x00c044b05b6ca83b9c2dbae79cc1135155956a64e136819136e9947fe5e5866c1c1f0ca244c7cd46b682552bff8ae77dea40b966a71de076ec3b7678f2bdb151",
+        "mspkMHash": "0x14a5d4bde495b8c3a9ba4aed0d4870526e46fdff22d341a2f689ac5a50d10356",
+        "npkMHash": "0x14fbaeaeddaa69be81d404c684e78e9f1a786d225faf8de2ce97c92f67d89a26",
+        "ovpkMHash": "0x0e60ed663a4da5636e2e25a1f1f0c5b27c011c8eaed22bbe61e2a0fd875dd24b",
+        "tpkMHash": "0x082c6d164b0ba073c9dd911100248c8ecd80b03f82f38531856a3c16dadcbef0"
+      },
+      "salt": "0x045bd5b18879b170fbaf986f38edefd20876c5d71fe0d0a73e683ccbd6ae6a3c",
+      "version": 2
+    },
+    "ETH": {
+      "address": "0x1bd7bed97565530867fe68b3f70326b68d181b4339e73e44acbfd7cf0f363a82",
+      "currentContractClassId": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+      "deployer": "0x28e554317605d261fb45652e9cde3a32d6c8fa6d2ae67a9af78a3f88429889c1",
+      "immutablesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "initializationHash": "0x0275c93947d3adc31af799dc8e0f1802b93008418c78054aad019117e895f7e4",
+      "originalContractClassId": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+      "publicKeys": {
+        "fbpkMHash": "0x0f124f07811eebfaaa6d31316a2cc5bf255fa118f720e8ff1f2fc0d4aa46d496",
+        "ivpkM": "0x00c044b05b6ca83b9c2dbae79cc1135155956a64e136819136e9947fe5e5866c1c1f0ca244c7cd46b682552bff8ae77dea40b966a71de076ec3b7678f2bdb151",
+        "mspkMHash": "0x14a5d4bde495b8c3a9ba4aed0d4870526e46fdff22d341a2f689ac5a50d10356",
+        "npkMHash": "0x14fbaeaeddaa69be81d404c684e78e9f1a786d225faf8de2ce97c92f67d89a26",
+        "ovpkMHash": "0x0e60ed663a4da5636e2e25a1f1f0c5b27c011c8eaed22bbe61e2a0fd875dd24b",
+        "tpkMHash": "0x082c6d164b0ba073c9dd911100248c8ecd80b03f82f38531856a3c16dadcbef0"
+      },
+      "salt": "0x13ea80fe038bbd9861f16099fd5d86f0361db3a7088aa068d8b47a29839801eb",
+      "version": 2
+    },
+    "PoolManager": {
+      "address": "0x186a86151478d752a5487e6945bfd98cd90d271b4c174f74ae4dfd85f3a34a65",
+      "currentContractClassId": "0x1b1be37112f247b11cb73c6bc805562d9686e97eaf74206c23396a55328ec97b",
+      "deployer": "0x28e554317605d261fb45652e9cde3a32d6c8fa6d2ae67a9af78a3f88429889c1",
+      "immutablesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "initializationHash": "0x0cd8d31989a60dbed85b4292e0904626a41dda06593c98cf0fb3609c3ce549e9",
+      "originalContractClassId": "0x1b1be37112f247b11cb73c6bc805562d9686e97eaf74206c23396a55328ec97b",
+      "publicKeys": {
+        "fbpkMHash": "0x0f124f07811eebfaaa6d31316a2cc5bf255fa118f720e8ff1f2fc0d4aa46d496",
+        "ivpkM": "0x00c044b05b6ca83b9c2dbae79cc1135155956a64e136819136e9947fe5e5866c1c1f0ca244c7cd46b682552bff8ae77dea40b966a71de076ec3b7678f2bdb151",
+        "mspkMHash": "0x14a5d4bde495b8c3a9ba4aed0d4870526e46fdff22d341a2f689ac5a50d10356",
+        "npkMHash": "0x14fbaeaeddaa69be81d404c684e78e9f1a786d225faf8de2ce97c92f67d89a26",
+        "ovpkMHash": "0x0e60ed663a4da5636e2e25a1f1f0c5b27c011c8eaed22bbe61e2a0fd875dd24b",
+        "tpkMHash": "0x082c6d164b0ba073c9dd911100248c8ecd80b03f82f38531856a3c16dadcbef0"
+      },
+      "salt": "0x0dda60364836315f208fdd5ad050a49f4d53ee4d7ab86332ceec378bfd5f38fe",
+      "version": 2
+    },
+    "SOL": {
+      "address": "0x2ddcb10b641147616162658a86a9b707761118f01c8b69818eb72873f0757bff",
+      "currentContractClassId": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+      "deployer": "0x28e554317605d261fb45652e9cde3a32d6c8fa6d2ae67a9af78a3f88429889c1",
+      "immutablesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "initializationHash": "0x1ab2a9baacff5f1d5810af64f2fa2801625789da3fc63e3890375d1802e4ec02",
+      "originalContractClassId": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+      "publicKeys": {
+        "fbpkMHash": "0x0f124f07811eebfaaa6d31316a2cc5bf255fa118f720e8ff1f2fc0d4aa46d496",
+        "ivpkM": "0x00c044b05b6ca83b9c2dbae79cc1135155956a64e136819136e9947fe5e5866c1c1f0ca244c7cd46b682552bff8ae77dea40b966a71de076ec3b7678f2bdb151",
+        "mspkMHash": "0x14a5d4bde495b8c3a9ba4aed0d4870526e46fdff22d341a2f689ac5a50d10356",
+        "npkMHash": "0x14fbaeaeddaa69be81d404c684e78e9f1a786d225faf8de2ce97c92f67d89a26",
+        "ovpkMHash": "0x0e60ed663a4da5636e2e25a1f1f0c5b27c011c8eaed22bbe61e2a0fd875dd24b",
+        "tpkMHash": "0x082c6d164b0ba073c9dd911100248c8ecd80b03f82f38531856a3c16dadcbef0"
+      },
+      "salt": "0x09f5a1681750d1bc0b0051b3b8a48bc2e2b1685caea5c4740c5dde2b321ef284",
+      "version": 2
+    },
+    "UNI": {
+      "address": "0x213a0c4a661b3d4f2705f22e52d8d2ddb8d735491bedd7e01246a8d064f25b2c",
+      "currentContractClassId": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+      "deployer": "0x28e554317605d261fb45652e9cde3a32d6c8fa6d2ae67a9af78a3f88429889c1",
+      "immutablesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "initializationHash": "0x0c30eea932810101175b3dd6e9eedd5bd50bee22229d4bbba5b64d7e4d68b654",
+      "originalContractClassId": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
+      "publicKeys": {
+        "fbpkMHash": "0x0f124f07811eebfaaa6d31316a2cc5bf255fa118f720e8ff1f2fc0d4aa46d496",
+        "ivpkM": "0x00c044b05b6ca83b9c2dbae79cc1135155956a64e136819136e9947fe5e5866c1c1f0ca244c7cd46b682552bff8ae77dea40b966a71de076ec3b7678f2bdb151",
+        "mspkMHash": "0x14a5d4bde495b8c3a9ba4aed0d4870526e46fdff22d341a2f689ac5a50d10356",
+        "npkMHash": "0x14fbaeaeddaa69be81d404c684e78e9f1a786d225faf8de2ce97c92f67d89a26",
+        "ovpkMHash": "0x0e60ed663a4da5636e2e25a1f1f0c5b27c011c8eaed22bbe61e2a0fd875dd24b",
+        "tpkMHash": "0x082c6d164b0ba073c9dd911100248c8ecd80b03f82f38531856a3c16dadcbef0"
+      },
+      "salt": "0x0b5da15c8c294952bd10fef8ae42b8ce209dd7c784bedaf22dd9b257c68fd84c",
+      "version": 2
+    }
+  },
+  "850140444": {
+    "PoolManager": {
+      "address": "0x0d2679d7b853dc5a2d4e6a1ff11d75a07a946e358a418b0182bd4aa6fab2de01",
+      "currentContractClassId": "0x020ae8b68df48e4300f1e490855466c382776b30437d3045645a4848a53871c7",
+      "deployer": "0x201d3ae7ed4e9a8c15b29bc5b7c07d660c150b29d86f6317d4cc101885f722b8",
+      "immutablesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "initializationHash": "0x028c400b5720f7ac0056992973de61c83957d9f2030c3b538953459979ce5425",
+      "originalContractClassId": "0x020ae8b68df48e4300f1e490855466c382776b30437d3045645a4848a53871c7",
+      "publicKeys": {
+        "fbpkMHash": "0x0f124f07811eebfaaa6d31316a2cc5bf255fa118f720e8ff1f2fc0d4aa46d496",
+        "ivpkM": "0x00c044b05b6ca83b9c2dbae79cc1135155956a64e136819136e9947fe5e5866c1c1f0ca244c7cd46b682552bff8ae77dea40b966a71de076ec3b7678f2bdb151",
+        "mspkMHash": "0x14a5d4bde495b8c3a9ba4aed0d4870526e46fdff22d341a2f689ac5a50d10356",
+        "npkMHash": "0x14fbaeaeddaa69be81d404c684e78e9f1a786d225faf8de2ce97c92f67d89a26",
+        "ovpkMHash": "0x0e60ed663a4da5636e2e25a1f1f0c5b27c011c8eaed22bbe61e2a0fd875dd24b",
+        "tpkMHash": "0x082c6d164b0ba073c9dd911100248c8ecd80b03f82f38531856a3c16dadcbef0"
+      },
+      "salt": "0x219ca6a52b80141559ee7bf4b3558a114ba49472d39a527f33b60c544a0a2605",
+      "version": 2
+    }
+  }
+}

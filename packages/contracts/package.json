@@ -1,0 +1,38 @@
+{
+  "name": "@nemi-fi/contracts",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./contracts": "./src/contracts.ts"
+  },
+  "scripts": {
+    "compile:noir": "bash ./scripts/compile-contracts.sh",
+    "test:runtime": "vitest run --pass-with-no-tests && pnpm gaztec test && node ./scripts/track-artifacts.js --action check",
+    "test:static": "tsc --noEmit --emitDeclarationOnly false && prettier --check . && pnpm gaztec nargo fmt --check",
+    "test:static:fix": "prettier --write . && pnpm gaztec nargo fmt",
+    "prepublishOnly": "echo 'this package is private' && exit 1"
+  },
+  "dependencies": {
+    "@aztec-foundation/aztec-standards": "catalog:",
+    "@aztec/accounts": "catalog:",
+    "@aztec/aztec.js": "catalog:",
+    "@nemi-fi/utils": "workspace:*",
+    "lodash-es": "catalog:",
+    "ox": "catalog:",
+    "ts-essentials": "catalog:",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@types/json-diff": "^1.0.3",
+    "@types/lodash-es": "catalog:",
+    "arg": "^5.0.2",
+    "gaztec": "catalog:",
+    "json-diff": "1.0.6",
+    "json-stringify-deterministic": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

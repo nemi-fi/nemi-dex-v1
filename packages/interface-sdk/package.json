@@ -1,0 +1,52 @@
+{
+  "name": "@nemi-fi/interface-sdk",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "compile:json-files": "if [ ! -f src/scripts/deploy/deployments-dynamic.json ]; then echo '{}' > src/scripts/deploy/deployments-dynamic.json; fi; if [ ! -f src/scripts/deploy/currency-list-dynamic.json ]; then echo '{}' > src/scripts/deploy/currency-list-dynamic.json; fi;",
+    "test:runtime": "vitest run --pass-with-no-tests",
+    "test:static": "tsc --noEmit --emitDeclarationOnly false && prettier --check .",
+    "test:static:fix": "prettier --write .",
+    "aztec:deploy": "tsx src/scripts/deploy/run-deploy.ts"
+  },
+  "dependencies": {
+    "@aztec/accounts": "catalog:",
+    "@aztec/aztec.js": "catalog:",
+    "@aztec/bb.js": "catalog:",
+    "@aztec/constants": "catalog:",
+    "@aztec/ethereum": "catalog:",
+    "@aztec/foundation": "catalog:",
+    "@aztec/noir-contracts.js": "catalog:",
+    "@aztec/noir-noir_js": "catalog:",
+    "@aztec/protocol-contracts": "catalog:",
+    "@aztec/stdlib": "catalog:",
+    "@aztec/wallet-sdk": "catalog:",
+    "@aztec/wallets": "catalog:",
+    "@nemi-fi/aztec-deploy": "workspace:*",
+    "@nemi-fi/contracts": "workspace:*",
+    "@nemi-fi/utils": "workspace:*",
+    "@nemi-fi/v1-sdk": "workspace:*",
+    "@noble/curves": "catalog:",
+    "@uniswap/sdk-core": "catalog:",
+    "ky": "catalog:",
+    "lodash-es": "catalog:",
+    "ms": "catalog:",
+    "ox": "catalog:",
+    "ts-essentials": "catalog:",
+    "viem": "catalog:",
+    "webauthn-p256": "^0.0.10",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "catalog:",
+    "@types/ms": "catalog:",
+    "consola": "^3.4.2",
+    "dotenv": "catalog:",
+    "prettier": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

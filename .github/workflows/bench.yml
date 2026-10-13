@@ -1,0 +1,59 @@
+name: Benchmark Gate Counts & Gas
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [synchronize, labeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  benchmark:
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-bench')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - uses: nemi-fi/gaztec@v1.4.2
+
+      - name: Start Aztec local blockchain
+        run: |
+          pnpm aztec:local-network 2>&1 &
+          # wait for the local network to be ready
+          while ! curl -s http://localhost:8080; do sleep 1; done
+
+      - name: Run benchmarks
+        env:
+          # Turborepo remote cache
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+        run: |
+          current_commit=$(git rev-parse HEAD)
+
+          base_branch_name=${{ github.event.pull_request.base.ref }}
+          git fetch origin $base_branch_name
+          git checkout $base_branch_name
+          base_commit=$(git rev-parse HEAD)
+          pnpm i && pnpm turbo bench
+          mv apps/bench/bench.json apps/bench/base-bench.json
+
+          git checkout $current_commit
+          pnpm i && pnpm turbo bench
+
+          node apps/bench/src/compareBenchmarks.js $base_branch_name apps/bench/bench.json apps/bench/base-bench.json $current_commit $base_commit
+
+      - name: PR comment
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: comment.md
+          skip_unchanged: true
+          hide_and_recreate: true
+          hide_classify: "OUTDATED"
