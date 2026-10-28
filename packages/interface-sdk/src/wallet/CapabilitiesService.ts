@@ -1,5 +1,5 @@
-import type { AztecAddress } from "@aztec/aztec.js/addresses";
-import type { AppCapabilities } from "@aztec/aztec.js/wallet";
+import type { AztecAddress } from "@aztec-labs/aztec.js/addresses";
+import type { AppCapabilities } from "@aztec-labs/aztec.js/wallet";
 import { sutils } from "@nemi-fi/utils";
 import type { CoreService, CurrencyListService } from "../sdk.js";
 

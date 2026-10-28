@@ -1,5 +1,5 @@
-import type { EventCursor } from "@aztec/aztec.js/events";
-import type { TxHash } from "@aztec/aztec.js/tx";
+import type { EventCursor } from "@aztec-labs/aztec.js/events";
+import type { TxHash } from "@aztec-labs/aztec.js/tx";
 import type {
   AddLiquidity,
   RemoveLiquidity,
@@ -97,7 +97,7 @@ export class AmmService {
     /** Unix seconds after which the transaction must no longer be settled. */
     deadline?: bigint;
   }) {
-    const { Fr } = await import("@aztec/aztec.js/fields");
+    const { Fr } = await import("@aztec-labs/aztec.js/fields");
 
     const [amount0, amount1] = sutils.sortAmounts(amountA, amountB);
 
@@ -256,7 +256,7 @@ export class AmmService {
     /** Unix seconds after which the transaction must no longer be settled. */
     deadline?: bigint;
   }): Promise<IQuote["executeInfo"]> {
-    const { Fr } = await import("@aztec/aztec.js/fields");
+    const { Fr } = await import("@aztec-labs/aztec.js/fields");
 
     const someAccount = await this.core.getReadonlyAccount();
     const poolManager = await this.getPoolManager();
@@ -370,7 +370,7 @@ export class AmmService {
     const node = await this.core.aztecNode();
     const { PoolManagerContract } =
       await import("@nemi-fi/contracts/contracts");
-    const { getPublicEvents } = await import("@aztec/aztec.js/events");
+    const { getPublicEvents } = await import("@aztec-labs/aztec.js/events");
 
     const filter = {
       contractAddress: poolManager.address,

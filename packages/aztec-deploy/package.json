@@ -34,8 +34,8 @@
     "test:static:fix": "prettier --write ."
   },
   "dependencies": {
-    "@aztec/aztec.js": "catalog:",
-    "@aztec/stdlib": "catalog:",
+    "@aztec-labs/aztec.js": "catalog:",
+    "@aztec-labs/stdlib": "catalog:",
     "@nemi-fi/utils": "workspace:*",
     "json-stringify-deterministic": "catalog:",
     "lodash-es": "catalog:",

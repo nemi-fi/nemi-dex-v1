@@ -1,4 +1,4 @@
-import type { Fr } from "@aztec/foundation/curves/bn254";
+import type { Fr } from "@aztec-labs/foundation/curves/bn254";
 import {
   CurrencyAmount,
   Fraction,
@@ -437,7 +437,8 @@ export async function getPoolId(
   currencyA: L2Token | string,
   currencyB: L2Token | string,
 ): Promise<string> {
-  const { poseidon2Hash } = await import("@aztec/foundation/crypto/poseidon");
+  const { poseidon2Hash } =
+    await import("@aztec-labs/foundation/crypto/poseidon");
 
   const a = typeof currencyA === "string" ? currencyA : currencyA.address;
   const b = typeof currencyB === "string" ? currencyB : currencyB.address;

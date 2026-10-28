@@ -1,4 +1,4 @@
-import type { AztecAddress } from "@aztec/aztec.js/addresses";
+import type { AztecAddress } from "@aztec-labs/aztec.js/addresses";
 import { readDeploymentJsonFiles } from "@nemi-fi/aztec-deploy/client";
 import { sutils } from "@nemi-fi/utils";
 import { L2Token } from "@nemi-fi/v1-sdk";
@@ -55,15 +55,6 @@ export class CurrencyListService {
     return currencies.find((t) =>
       sutils.isAddressEqual(t.address, tokenAddress),
     );
-  }
-
-  async getCurrencyByAddressOrThrow(address: string | AztecAddress) {
-    await this.loadCurrenciesOnce();
-    const currency = this.getCurrency(address);
-    if (!currency) {
-      throw new Error(`Currency not found: ${address}`);
-    }
-    return currency;
   }
 
   /**

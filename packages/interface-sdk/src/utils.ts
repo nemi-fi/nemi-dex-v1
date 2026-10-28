@@ -1,13 +1,14 @@
-import type { Fr } from "@aztec/aztec.js/fields";
-import type { EmbeddedWallet } from "@aztec/wallets/embedded";
+import type { Fr } from "@aztec-labs/aztec.js/fields";
+import type { EmbeddedWallet } from "@aztec-labs/wallets/embedded";
 
 export async function getSingleKeyAccount(
   wallet: EmbeddedWallet,
   secretKey: Fr,
   alias: string,
 ) {
-  const { Fq, Fr } = await import("@aztec/aztec.js/fields");
-  const { poseidon2Hash } = await import("@aztec/foundation/crypto/poseidon");
+  const { Fq, Fr } = await import("@aztec-labs/aztec.js/fields");
+  const { poseidon2Hash } =
+    await import("@aztec-labs/foundation/crypto/poseidon");
 
   // Aztec v5 removed the implicit signing key derivation, so it has to be passed in. Derive
   // it from the secret so a given secretKey still maps to a single account.

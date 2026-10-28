@@ -1,0 +1,10 @@
+# https://developers.cloudflare.com/workers/static-assets/headers
+# Static assets are served by Cloudflare without hitting the Worker.
+# Cross-origin isolation is needed for multithreaded proving.
+# vercel.json sets the same headers when deployed to Vercel.
+/*
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Opener-Policy: same-origin
+
+/assets/*
+  Cache-Control: public,max-age=31536000,immutable

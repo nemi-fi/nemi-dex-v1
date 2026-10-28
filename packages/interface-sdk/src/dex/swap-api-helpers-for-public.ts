@@ -1,8 +1,8 @@
-import type { FunctionCall } from "@aztec/aztec.js/abi";
-import type { AztecAddress } from "@aztec/aztec.js/addresses";
-import type { CallIntent } from "@aztec/aztec.js/authorization";
-import type { InteractionFeeOptions } from "@aztec/aztec.js/contracts";
-import type { Wallet } from "@aztec/aztec.js/wallet";
+import type { FunctionCall } from "@aztec-labs/aztec.js/abi";
+import type { AztecAddress } from "@aztec-labs/aztec.js/addresses";
+import type { CallIntent } from "@aztec-labs/aztec.js/authorization";
+import type { InteractionFeeOptions } from "@aztec-labs/aztec.js/contracts";
+import type { Wallet } from "@aztec-labs/aztec.js/wallet";
 import { sutils } from "@nemi-fi/utils";
 
 export async function executeSwapApiQuote(
@@ -16,8 +16,8 @@ export async function executeSwapApiQuote(
   options: { fee?: InteractionFeeOptions } = {},
 ) {
   const { ExecutionPayload, mergeExecutionPayloads } =
-    await import("@aztec/stdlib/tx");
-  const { NO_WAIT } = await import("@aztec/aztec.js/contracts");
+    await import("@aztec-labs/stdlib/tx");
+  const { NO_WAIT } = await import("@aztec-labs/aztec.js/contracts");
 
   const q = await decodeSwapApiQuote(quote);
   let executionPayload = new ExecutionPayload(
@@ -97,12 +97,12 @@ export interface ExecuteInfo {
 }
 
 export async function encodeFunctionCall(call: FunctionCall) {
-  const { jsonStringify } = await import("@aztec/foundation/json-rpc");
+  const { jsonStringify } = await import("@aztec-labs/foundation/json-rpc");
   return jsonStringify(call) as SerializedFunctionCall;
 }
 
 export async function decodeFunctionCall(fc: string) {
-  const { FunctionCall } = await import("@aztec/aztec.js/abi");
+  const { FunctionCall } = await import("@aztec-labs/aztec.js/abi");
   return FunctionCall.schema.parse(JSON.parse(fc));
 }
 

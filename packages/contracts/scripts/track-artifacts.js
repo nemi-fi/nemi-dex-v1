@@ -1,7 +1,7 @@
 // Track artifacts to see updates in git diffs.
 // This is useful to ensure that the artifacts are staying the same between releases so we don't break the UI unexpectedly.
-import { loadContractArtifact } from "@aztec/aztec.js/abi";
-import { getContractClassFromArtifact } from "@aztec/aztec.js/contracts";
+import { loadContractArtifact } from "@aztec-labs/aztec.js/abi";
+import { getContractClassFromArtifact } from "@aztec-labs/aztec.js/contracts";
 import arg from "arg";
 import { diffString } from "json-diff";
 import jsonStringifyDeterministic from "json-stringify-deterministic";

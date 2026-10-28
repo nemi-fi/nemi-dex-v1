@@ -1,7 +1,7 @@
-import { NO_WAIT } from "@aztec/aztec.js/contracts";
-import { waitForTx, type AztecNode } from "@aztec/aztec.js/node";
-import type { PXE } from "@aztec/pxe/client/lazy";
-import type { EmbeddedWallet } from "@aztec/wallets/embedded";
+import { NO_WAIT } from "@aztec-labs/aztec.js/contracts";
+import { waitForTx, type AztecNode } from "@aztec-labs/aztec.js/node";
+import type { PXE } from "@aztec-labs/pxe/client/lazy";
+import type { EmbeddedWallet } from "@aztec-labs/wallets/embedded";
 import { sutils } from "@nemi-fi/utils";
 import fs from "node:fs";
 import {

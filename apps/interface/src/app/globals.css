@@ -1,0 +1,572 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/geist-mono";
+
+@custom-variant dark (&:is(.dark *));
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Nemi gradient variables */
+  .nemi-gradient-ring {
+    --nemi-pink: rgb(236, 72, 153);
+    --nemi-orange: rgb(251, 146, 60);
+    --nemi-purple: rgb(147, 51, 234);
+    background: conic-gradient(
+      from 0deg,
+      var(--nemi-pink),
+      var(--nemi-orange),
+      var(--nemi-purple),
+      var(--nemi-pink)
+    );
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --font-mono: "Geist Mono Variable", monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Colors from the Nemi "vibe" design */
+:root {
+  --radius: 0.625rem;
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #111827;
+  --muted: #f5f5f5;
+  --muted-foreground: #71717a;
+  --accent: #f5f5f5;
+  --accent-foreground: #000000;
+  --destructive: #ef4444;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #3b82f6;
+  --chart-1: #3b82f6;
+  --chart-2: #f3662e;
+  --chart-3: #afa23a;
+  --chart-4: #1f6237;
+  --chart-5: #f3789d;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f5f5;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #3b82f6;
+}
+
+.dark {
+  --background: #121212;
+  --foreground: #ffffff;
+  --card: #1e1e1e;
+  --card-foreground: #ffffff;
+  --popover: #1e1e1e;
+  --popover-foreground: #ffffff;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #27272a;
+  --secondary-foreground: #ffffff;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --border: #333333;
+  --input: #333333;
+  --ring: #3b82f6;
+  --chart-1: #3b82f6;
+  --chart-2: #f3662e;
+  --chart-3: #afa23a;
+  --chart-4: #1f6237;
+  --chart-5: #f3789d;
+  --sidebar: #1e1e1e;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #27272a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #333333;
+  --sidebar-ring: #3b82f6;
+}
+
+@layer base {
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* App background: puzzle pieces around the content and faint outlines behind it */
+.vibe-bg {
+  background-image:
+    url("/images/puzzle/vibe-outline.svg"),
+    url("/images/puzzle/vibe-pieces.svg");
+  background-position:
+    50%,
+    50% 20%;
+  background-repeat: no-repeat;
+  background-size: cover, min(1100px, 55%);
+  background-attachment: fixed;
+}
+
+@media (width <= 1280px) {
+  .vibe-bg {
+    background-position:
+      50%,
+      50% 45%;
+    background-size: cover, min(900px, 90%);
+  }
+}
+
+@media (width <= 768px) {
+  .vibe-bg {
+    background-position:
+      50%,
+      50% 40%;
+    background-size: cover, min(700px, 95%);
+  }
+}
+
+@media (width <= 480px) {
+  .vibe-bg {
+    background-position:
+      50%,
+      50% 35%;
+    background-size: cover, min(450px, 98%);
+  }
+}
+
+/* Frosted card that sits over the puzzle pieces */
+.vibe-card {
+  background: linear-gradient(122.17deg, #f9f9f933 -5.6%, #c0bcb980 119.04%);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px #0000001a;
+  backdrop-filter: blur(10.7px);
+  -webkit-backdrop-filter: blur(10.7px);
+}
+
+.dark .vibe-card {
+  background: linear-gradient(122.17deg, #2a2a2acc -5.6%, #1e1e1ee6 119.04%);
+  box-shadow: 0 4px 30px #00000066;
+}
+
+/*
+ * Scroll reveal: fades content in as it enters the viewport. CSS only (scroll-driven
+ * animations), so content is visible before hydration and in browsers without support.
+ */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(2.5rem);
+  }
+}
+
+@keyframes reveal-side {
+  from {
+    opacity: 0;
+    transform: translateX(2.5rem);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal,
+    .reveal-side {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+
+    .reveal-side {
+      animation-name: reveal-side;
+    }
+  }
+}
+
+/* Performance-optimized animations and transitions */
+@layer utilities {
+  /* Transitions */
+  .transition-fade {
+    transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity;
+  }
+
+  .transition-scale {
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .transition-transform {
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .transition-all-smooth {
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Animations */
+  .animate-fade-in {
+    animation: fadeIn 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-fade-out {
+    animation: fadeOut 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-scale-out {
+    animation: scaleOut 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-slide-in-up {
+    animation: slideInUp 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-slide-in-down {
+    animation: slideInDown 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    will-change: background-position;
+  }
+
+  .animate-ripple {
+    animation: ripple 1s ease-in-out infinite;
+  }
+
+  .wallet-header-bg {
+    background-image: url("/images/bg.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* fallback color for accessibility */
+    background-color: #f8fafc;
+  }
+}
+
+/* Keyframes definitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Puzzle piece animations */
+@keyframes float-blue {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateX(-52%) translateY(15px) rotate(1deg);
+  }
+}
+
+@keyframes float-green {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(12px) translateX(-5px) rotate(2deg);
+  }
+}
+
+@keyframes float-green1 {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0) rotate(-10deg);
+  }
+  50% {
+    transform: translateY(-12px) translateX(8px) rotate(-8deg);
+  }
+}
+
+@keyframes float-orange {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0) rotate(15deg);
+  }
+  50% {
+    transform: translateY(10px) translateX(-10px) rotate(13deg);
+  }
+}
+
+@keyframes float-pink {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(-8px) translateX(5px) rotate(-7deg);
+  }
+}
+
+.animate-float-blue {
+  animation: float-blue 25s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+}
+
+.animate-float-green {
+  animation: float-green 28s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-float-green1 {
+  animation: float-green1 22s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-float-orange {
+  animation: float-orange 30s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-float-pink {
+  animation: float-pink 26s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* New enhanced shimmer effect for the private swap button */
+@keyframes button-shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.animate-button-shimmer {
+  overflow: hidden;
+  position: relative;
+}
+
+.animate-button-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: -100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-45deg);
+  width: 50%;
+  animation: button-shimmer 3s infinite;
+  will-change: transform, left;
+  z-index: 1;
+}
+
+.dark .animate-button-shimmer::after {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+/* In the base layer so utilities such as `hidden` can still override it */
+@layer base {
+  img,
+  svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+}

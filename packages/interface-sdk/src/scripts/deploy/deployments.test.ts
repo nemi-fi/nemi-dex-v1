@@ -1,9 +1,9 @@
-import type { ContractArtifact } from "@aztec/aztec.js/abi";
+import type { ContractArtifact } from "@aztec-labs/aztec.js/abi";
 import {
   computeContractAddressFromInstance,
   ContractInstanceWithAddressSchema,
   getContractClassFromArtifact,
-} from "@aztec/stdlib/contract";
+} from "@aztec-labs/stdlib/contract";
 import {
   PoolManagerContract,
   TokenContract,

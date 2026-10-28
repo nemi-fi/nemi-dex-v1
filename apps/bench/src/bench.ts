@@ -1,6 +1,6 @@
-import { getInitialTestAccountsData } from "@aztec/accounts/testing";
-import { AztecAddress } from "@aztec/aztec.js/addresses";
-import { Fr } from "@aztec/aztec.js/fields";
+import { getInitialTestAccountsData } from "@aztec-labs/accounts/testing";
+import { AztecAddress } from "@aztec-labs/aztec.js/addresses";
+import { Fr } from "@aztec-labs/aztec.js/fields";
 import {
   PoolManagerContract,
   TokenContract,

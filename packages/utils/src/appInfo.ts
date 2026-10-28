@@ -1,5 +1,5 @@
-import type { AztecAddress } from "@aztec/aztec.js/addresses";
-import type { TxHash } from "@aztec/aztec.js/tx";
+import type { AztecAddress } from "@aztec-labs/aztec.js/addresses";
+import type { TxHash } from "@aztec-labs/aztec.js/tx";
 import { pick } from "lodash-es";
 import type { ValueOf } from "ts-essentials";
 import { joinURL } from "ufo";

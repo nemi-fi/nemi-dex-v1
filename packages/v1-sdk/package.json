@@ -15,7 +15,7 @@
     "vitest": "catalog:"
   },
   "dependencies": {
-    "@aztec/foundation": "catalog:",
+    "@aztec-labs/foundation": "catalog:",
     "@uniswap/sdk-core": "catalog:",
     "jsbi": "^3.2.5",
     "tiny-invariant": "^1.3.3"

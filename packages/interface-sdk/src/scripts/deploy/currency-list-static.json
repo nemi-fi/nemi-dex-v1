@@ -1,43 +1,43 @@
 {
-  "3038323768": [
+  "1276970776": [
     {
-      "address": "0x2beed2896b6a9c39a0a4ded660d943c76ebd76cc4977f5b3a8e276cfd6659bf8",
-      "chainId": 3038323768,
+      "address": "0x1ddd9434f70328aa05e2c0c203fb618ea78cc0e737c60d13b8668dc4da904717",
+      "chainId": 1276970776,
       "decimals": 9,
       "name": "Aave",
       "symbol": "AAVE"
     },
     {
-      "address": "0x021898a89cda39200487afc95db309f0e1637dbeff943f82f34114a5406f2372",
-      "chainId": 3038323768,
+      "address": "0x2939e8cbe1e295dc99a253417b795533f70dd5111b42892bb383d3a8c9277a54",
+      "chainId": 1276970776,
       "decimals": 8,
       "name": "Bitcoin",
       "symbol": "BTC"
     },
     {
-      "address": "0x020425a6d7319ebce74968e77760378f0656c0c94cd9654fb26889fb5344938d",
-      "chainId": 3038323768,
+      "address": "0x03f6b3e1f42119404a3273a19f7936c5d8fa14fd57aad87d94847deba93ec842",
+      "chainId": 1276970776,
       "decimals": 9,
       "name": "Dai Stablecoin",
       "symbol": "DAI"
     },
     {
-      "address": "0x1bd7bed97565530867fe68b3f70326b68d181b4339e73e44acbfd7cf0f363a82",
-      "chainId": 3038323768,
+      "address": "0x126eb73a2db2c145ac09773df064c13b279390543ace1bfbcef54fd506028970",
+      "chainId": 1276970776,
       "decimals": 9,
       "name": "Ethereum",
       "symbol": "ETH"
     },
     {
-      "address": "0x2ddcb10b641147616162658a86a9b707761118f01c8b69818eb72873f0757bff",
-      "chainId": 3038323768,
+      "address": "0x109d53c9f6d9e3fdf1d29e02d13bd8a4998c613d2f3709aa4917e9ea78bf1b4e",
+      "chainId": 1276970776,
       "decimals": 9,
       "name": "Solana",
       "symbol": "SOL"
     },
     {
-      "address": "0x213a0c4a661b3d4f2705f22e52d8d2ddb8d735491bedd7e01246a8d064f25b2c",
-      "chainId": 3038323768,
+      "address": "0x121b96d69f80c081c9cbafc3651fa0273d3f1c56f8111e3696220271698bcd3e",
+      "chainId": 1276970776,
       "decimals": 9,
       "name": "Uniswap",
       "symbol": "UNI"

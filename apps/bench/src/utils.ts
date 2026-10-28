@@ -1,7 +1,7 @@
-import type { AztecAddress } from "@aztec/aztec.js/addresses";
-import type { ContractFunctionInteraction } from "@aztec/aztec.js/contracts";
-import { waitForNode } from "@aztec/aztec.js/node";
-import type { GasDimensions } from "@aztec/stdlib/gas";
+import type { AztecAddress } from "@aztec-labs/aztec.js/addresses";
+import type { ContractFunctionInteraction } from "@aztec-labs/aztec.js/contracts";
+import { waitForNode } from "@aztec-labs/aztec.js/node";
+import type { GasDimensions } from "@aztec-labs/stdlib/gas";
 import { sutils } from "@nemi-fi/utils";
 import { castArray } from "lodash-es";
 import { parseUnits } from "viem";

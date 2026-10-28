@@ -9,12 +9,12 @@
     "test:static:fix": "prettier --write ."
   },
   "dependencies": {
-    "@aztec/accounts": "catalog:",
-    "@aztec/aztec.js": "catalog:",
-    "@aztec/pxe": "catalog:",
-    "@aztec/stdlib": "catalog:",
-    "@aztec/wallet-sdk": "catalog:",
-    "@aztec/wallets": "catalog:",
+    "@aztec-labs/accounts": "catalog:",
+    "@aztec-labs/aztec.js": "catalog:",
+    "@aztec-labs/pxe": "catalog:",
+    "@aztec-labs/stdlib": "catalog:",
+    "@aztec-labs/wallet-sdk": "catalog:",
+    "@aztec-labs/wallets": "catalog:",
     "@nemi-fi/contracts": "workspace:*",
     "@nemi-fi/utils": "workspace:*",
     "@nemi-fi/v1-sdk": "workspace:*",

@@ -28,7 +28,7 @@ Scripts that should be run from the root of the monorepo:
 - `pnpm aztec:local-network` - Start Aztec local network
 - `CHAIN=testnet pnpm aztec:deploy` - Deploy Aztec contracts
 
-All other scripts should be run from a project folder (e.g., `cd apps/client && turbo dev`). These scripts follow the same pattern in all projects:
+All other scripts should be run from a project folder (e.g., `cd apps/interface && turbo dev`). These scripts follow the same pattern in all projects:
 
 - `turbo dev` - Start in development mode
 - `turbo build` - Build for production
@@ -47,14 +47,20 @@ Development inside `apps/*` folder is usually accompanied by running `turbo dev`
 
 To test the whole project, run `turbo test` in the root.
 
+## Deployment
+
+`apps/interface` deploys to both Cloudflare Workers ([workflow](.github/workflows/deploy-interface.yml)) and Vercel (Git integration, Root Directory `apps/interface`). Its build targets Vercel when the `VERCEL` environment variable is set, which Vercel does on its build machines, and Cloudflare otherwise.
+
 ## Note on Aztec
 
 We use [`gaztec`](https://github.com/nemi-fi/gaztec) to manage Aztec versions.
+
+## Dependencies
+
+`pnpm-workspace.yaml` sets `minimumReleaseAge` to one week, so pnpm refuses package versions published less than a week ago. When adding or bumping a dependency, pick the newest version that is at least a week old. Do not add entries to `minimumReleaseAgeExclude` (or otherwise bypass the rule) unless explicitly asked to.
 
 ## PR guidelines
 
 1. Title prefixed with `feat`, `fix`, `refactor` or `chore`. Optionally, add scope in parenthesis. See full list of prefixes and scopes in the [workflow](.github/workflows/pull-request-title.yml). E.g., `feat: add new feature`, `chore(ci): update node version`.
 2. Branch name prefixed with 2 letter initials and then dashed name of the feature. E.g., `om/update-docs`
 3. When merged, commits are squashed into one commit with the title of the PR.
-
-If Vercel fails on PR, it is likely due to Noir artifacts not being uploaded to the remote cache yet. Waiting and re-deploying on Vercel usually fixes it.

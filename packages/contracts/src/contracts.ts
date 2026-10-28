@@ -1,4 +1,4 @@
-export { TokenContract } from "./artifacts/Token.js";
+export { TokenContract } from "@aztec-foundation/aztec-standards/artifacts/src/artifacts/Token.js";
 export {
   PoolManagerContract,
   type AddLiquidity,

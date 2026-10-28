@@ -1,16 +1,15 @@
-import type { AztecAddress } from "@aztec/aztec.js/addresses";
-import { NO_WAIT } from "@aztec/aztec.js/contracts";
-import { L1FeeJuicePortalManager } from "@aztec/aztec.js/ethereum";
-import { FeeJuicePaymentMethodWithClaim } from "@aztec/aztec.js/fee";
-import { Fq, Fr } from "@aztec/aztec.js/fields";
-import { createLogger } from "@aztec/aztec.js/log";
-import { waitForTx, type AztecNode } from "@aztec/aztec.js/node";
-import { getFeeJuiceBalance } from "@aztec/aztec.js/utils";
-import { createEthereumChain } from "@aztec/ethereum/chain";
-import { createExtendedL1Client } from "@aztec/ethereum/client";
-import { retryUntil } from "@aztec/foundation/retry";
-import { FeeJuiceContract } from "@aztec/noir-contracts.js/FeeJuice";
-import { ProtocolContractAddress } from "@aztec/protocol-contracts";
+import type { AztecAddress } from "@aztec-labs/aztec.js/addresses";
+import { NO_WAIT } from "@aztec-labs/aztec.js/contracts";
+import { L1FeeJuicePortalManager } from "@aztec-labs/aztec.js/ethereum";
+import { FeeJuicePaymentMethodWithClaim } from "@aztec-labs/aztec.js/fee";
+import { Fq, Fr } from "@aztec-labs/aztec.js/fields";
+import { createLogger } from "@aztec-labs/aztec.js/log";
+import { waitForTx, type AztecNode } from "@aztec-labs/aztec.js/node";
+import { FeeJuiceContract } from "@aztec-labs/aztec.js/protocol";
+import { getFeeJuiceBalance } from "@aztec-labs/aztec.js/utils";
+import { createEthereumChain } from "@aztec-labs/ethereum/chain";
+import { createExtendedL1Client } from "@aztec-labs/ethereum/client";
+import { retryUntil } from "@aztec-labs/foundation/retry";
 import { sutils } from "@nemi-fi/utils";
 import { Hex } from "ox";
 import { assert } from "ts-essentials";
@@ -89,10 +88,7 @@ export async function faucetTo({
 
   await waitForL1ToL2Message(aztecNode, claim.messageHash);
 
-  const feeJuice = FeeJuiceContract.at(
-    ProtocolContractAddress.FeeJuice,
-    account.wallet,
-  );
+  const feeJuice = FeeJuiceContract.withWallet(account.wallet);
   const { txHash } = await feeJuice.methods
     .claim(to, claim.claimAmount, claim.claimSecret, claim.messageLeafIndex)
     .send({ from: account.address, wait: NO_WAIT });

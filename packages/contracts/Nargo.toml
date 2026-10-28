@@ -1,2 +1,2 @@
 [workspace]
-members = ["noir/pool_manager", "noir/token"]
+members = ["noir/pool_manager"]

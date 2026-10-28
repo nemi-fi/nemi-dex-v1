@@ -1,4 +1,4 @@
-import { getFeeJuiceBalance } from "@aztec/aztec.js/utils";
+import { getFeeJuiceBalance } from "@aztec-labs/aztec.js/utils";
 import { tokenContract } from "@nemi-fi/contracts";
 import { sutils } from "@nemi-fi/utils";
 import type { L2Token, Trade } from "@nemi-fi/v1-sdk";
@@ -76,6 +76,7 @@ describe(AmmService, () => {
         account: alice,
         amountA,
         amountB,
+        deadline: await deadlineFromChainTime(),
       });
       await tx.wait();
 
@@ -207,6 +208,7 @@ describe(AmmService, () => {
         amountLp,
         amountA,
         amountB,
+        deadline: await deadlineFromChainTime(),
       });
       await tx.wait();
 
@@ -262,11 +264,30 @@ describe(AmmService, () => {
     });
   });
 
+  /**
+   * `sutils.deadlineFromNow()` uses the wall clock, but the contract checks the deadline against chain time. On the
+   * local network every block advances chain time by a full slot, so after enough txs chain time runs ahead of the
+   * wall clock by more than the default TTL. Derive the deadline from the latest block's timestamp instead.
+   */
+  async function deadlineFromChainTime() {
+    const aztecNode = await coreSdk.core.aztecNode();
+    const block = await aztecNode.getBlockData("latest");
+    assert(block, "latest block not found");
+    return (
+      block.header.globalVariables.timestamp +
+      BigInt(sutils.DEFAULT_DEADLINE_TTL_SECONDS)
+    );
+  }
+
   async function executeSwap(
     account: Account,
     trade: Trade<L2Token, L2Token, TradeType.EXACT_INPUT>,
   ) {
-    const executeInfo = await dexSdk.amm.getSwapParams({ account, trade });
+    const executeInfo = await dexSdk.amm.getSwapParams({
+      account,
+      trade,
+      deadline: await deadlineFromChainTime(),
+    });
 
     const tx = await sutils.bench(
       "swap",

@@ -1,6 +1,6 @@
-import type { AztecAddress } from "@aztec/aztec.js/addresses";
-import type { Wallet } from "@aztec/aztec.js/wallet";
-import type { WalletProvider } from "@aztec/wallet-sdk/manager";
+import type { AztecAddress } from "@aztec-labs/aztec.js/addresses";
+import type { Wallet } from "@aztec-labs/aztec.js/wallet";
+import type { WalletProvider } from "@aztec-labs/wallet-sdk/manager";
 import { sutils } from "@nemi-fi/utils";
 import { assert, UnreachableCaseError, type ValueOf } from "ts-essentials";
 import type { CoreService } from "../sdk.js";
@@ -33,7 +33,10 @@ export class WalletService {
     private toast: IToastService,
   ) {}
 
-  /** Resolves once persisted embedded accounts have been restored. */
+  /**
+   * Resolves once a persisted embedded session has been restored (immediately when there is
+   * none, since the embedded wallet then starts lazily).
+   */
   get ready() {
     return this.embeddedWallet.ready;
   }
@@ -60,9 +63,17 @@ export class WalletService {
     }
   }
 
-  /** Embedded accounts available to select, each with a display name for the connect UI. */
+  /**
+   * Embedded accounts available to select, each with a display name for the connect UI.
+   * Empty until {@link loadAccounts} has run (or a session was restored at startup).
+   */
   get accounts() {
     return this.embeddedWallet.allAccounts;
+  }
+
+  /** Starts the embedded wallet if needed so {@link accounts} is populated. */
+  async loadAccounts() {
+    await this.embeddedWallet.load();
   }
 
   async selectAccount(address: sutils.AztecAddressable) {
@@ -108,7 +119,7 @@ export class WalletService {
   /** Discover available external wallet extensions via the Aztec wallet-sdk. */
   async discoverWallets(): Promise<DiscoveredWallet[]> {
     try {
-      const { WalletManager } = await import("@aztec/wallet-sdk/manager");
+      const { WalletManager } = await import("@aztec-labs/wallet-sdk/manager");
       const wallet = await this.core.getTestWallet();
       const chainInfo = await wallet.getChainInfo();
 
@@ -140,7 +151,7 @@ export class WalletService {
 
       // Show the emoji fingerprint so the user can verify it matches their wallet. If we can't
       // produce it the user can't verify the channel, so fail instead of connecting blind.
-      const { hashToEmoji } = await import("@aztec/wallet-sdk/crypto");
+      const { hashToEmoji } = await import("@aztec-labs/wallet-sdk/crypto");
       this.#verificationEmoji.current = hashToEmoji(pending.verificationHash);
 
       const wallet = await pending.confirm();

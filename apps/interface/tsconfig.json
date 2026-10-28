@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "types": ["vite/client", "./.cloudflare/types/index.d.ts"],
+    "rootDirs": [".", "./.react-router/types"],
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".react-router/types/**/*"],
+  "exclude": ["node_modules", "build"]
+}

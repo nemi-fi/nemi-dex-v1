@@ -1,7 +1,7 @@
-import { type AztecNode } from "@aztec/aztec.js/node";
-import { Gas as AztecGas, GasDimensions } from "@aztec/stdlib/gas";
-import { getGasLimits } from "@aztec/wallet-sdk/base-wallet";
-import type { EmbeddedWallet } from "@aztec/wallets/embedded";
+import { type AztecNode } from "@aztec-labs/aztec.js/node";
+import { Gas as AztecGas, GasDimensions } from "@aztec-labs/stdlib/gas";
+import { getGasLimits } from "@aztec-labs/wallet-sdk/base-wallet";
+import type { EmbeddedWallet } from "@aztec-labs/wallets/embedded";
 import { sum } from "lodash-es";
 import fs from "node:fs";
 import {

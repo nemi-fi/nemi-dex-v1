@@ -9,7 +9,6 @@ import { DeploymentsService } from "./dev/DeploymentsService.js";
 import { AmmService } from "./dex/AmmService.js";
 import { AmmRouter } from "./dex/routers/AmmRouter.js";
 import { UniversalRouter } from "./dex/routers/UniversalRouter.js";
-import { SwapApiService } from "./dex/server/SwapApiService.js";
 import {
   wrapToastWithLogger,
   type IAztecService,
@@ -114,20 +113,6 @@ export function createDex(sdk: ReturnType<typeof createCore>) {
   return {
     amm,
     universalRouter,
-  };
-}
-
-// TODO(security): move this and all backend services to a separate package
-export function createBackend(
-  sdk: ReturnType<typeof createCore> & ReturnType<typeof createDex>,
-) {
-  const swapApi = new SwapApiService(
-    sdk.core,
-    sdk.currencyList,
-    sdk.universalRouter,
-  );
-  return {
-    swapApi,
   };
 }
 

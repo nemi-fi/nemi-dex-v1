@@ -1,4 +1,4 @@
-import type { AztecAddress } from "@aztec/aztec.js/addresses";
+import type { AztecAddress } from "@aztec-labs/aztec.js/addresses";
 import { sutils } from "@nemi-fi/utils";
 import { type L2Token } from "@nemi-fi/v1-sdk";
 import { CurrencyAmount, Price, type Currency } from "@uniswap/sdk-core";
@@ -9,10 +9,11 @@ import type {
   LoggerService,
   TransactionTrackerService,
 } from "../../sdk.js";
-import { encodeSwapApiQuote } from "../server/SwapApiService.js";
 import {
+  encodeFunctionCall,
   executeSwapApiQuote,
   type ExecuteInfo,
+  type SwapApiQuote,
 } from "../swap-api-helpers-for-public.js";
 
 export class UniversalRouter implements IQuoter {
@@ -107,6 +108,28 @@ export class IQuote {
       quoteAmount: this.amountOut,
     });
   }
+}
+
+export async function encodeSwapApiQuote(quote: IQuote) {
+  const calls = await Promise.all(
+    quote.executeInfo.calls.map((call) => encodeFunctionCall(call)),
+  );
+  const apiQuote: SwapApiQuote = {
+    transaction: {
+      calls,
+      allowanceIntents: await Promise.all(
+        quote.executeInfo.allowanceIntents.map(async (intent) => ({
+          caller: intent.caller.toString(),
+          call: await encodeFunctionCall(intent.call),
+        })),
+      ),
+    },
+    sellToken: quote.amountIn.currency.address,
+    sellAmount: sutils.currencyAmountToBigInt(quote.amountIn).toString(),
+    buyToken: quote.amountOut.currency.address,
+    buyAmount: sutils.currencyAmountToBigInt(quote.amountOut).toString(),
+  };
+  return apiQuote;
 }
 
 export function orderByPrice<T>(

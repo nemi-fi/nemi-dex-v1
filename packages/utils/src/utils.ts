@@ -1,8 +1,8 @@
-import type { AztecAddress } from "@aztec/aztec.js/addresses";
-import type { FeePaymentMethod } from "@aztec/aztec.js/fee";
-import type { AztecNode } from "@aztec/aztec.js/node";
-import type { TxHash, TxReceipt } from "@aztec/aztec.js/tx";
-import type { AccountManager, Wallet } from "@aztec/aztec.js/wallet";
+import type { AztecAddress } from "@aztec-labs/aztec.js/addresses";
+import type { FeePaymentMethod } from "@aztec-labs/aztec.js/fee";
+import type { AztecNode } from "@aztec-labs/aztec.js/node";
+import type { TxHash, TxReceipt } from "@aztec-labs/aztec.js/tx";
+import type { AccountManager, Wallet } from "@aztec-labs/aztec.js/wallet";
 import {
   CurrencyAmount,
   Fraction,
@@ -88,7 +88,7 @@ export async function promiseAllObject<
 export async function resolveAztecAddress(
   address: AztecAddressable,
 ): Promise<AztecAddress> {
-  const { AztecAddress } = await import("@aztec/aztec.js/addresses");
+  const { AztecAddress } = await import("@aztec-labs/aztec.js/addresses");
   let a;
   if (typeof address === "object" && "address" in address) {
     a = address.address;
@@ -293,9 +293,9 @@ export async function ensureAccountDeployed(
   if (isDeployable) {
     const isDeployed: boolean = await isAccountDeployed(accountManager);
     if (!isDeployed) {
-      const { NO_FROM } = await import("@aztec/aztec.js/account");
-      const { waitForTx } = await import("@aztec/aztec.js/node");
-      const { NO_WAIT } = await import("@aztec/aztec.js/contracts");
+      const { NO_FROM } = await import("@aztec-labs/aztec.js/account");
+      const { waitForTx } = await import("@aztec-labs/aztec.js/node");
+      const { NO_WAIT } = await import("@aztec-labs/aztec.js/contracts");
       const txHashPromise = (await accountManager.getDeployMethod()).send({
         from: NO_FROM,
         fee: { paymentMethod },
@@ -348,7 +348,7 @@ function getWalletFromAccountManager(accountManager: AccountManager): Wallet {
 
 export async function isAccountDeployed(accountManager: AccountManager) {
   const { ContractInitializationStatus } =
-    await import("@aztec/aztec.js/wallet");
+    await import("@aztec-labs/aztec.js/wallet");
   const wallet = getWalletFromAccountManager(accountManager);
   const { initializationStatus } = await wallet.getContractMetadata(
     await resolveAztecAddress(accountManager),
@@ -364,7 +364,7 @@ export interface WalletAccount {
 export async function createAztecNode<C extends AvmChain>(
   chain: C,
 ): Promise<EnhancedAztecNode<C>> {
-  const { createAztecNodeClient } = await import("@aztec/aztec.js/node");
+  const { createAztecNodeClient } = await import("@aztec-labs/aztec.js/node");
   const node = createAztecNodeClient(chain.rpcUrls.default.http[0]);
   return Object.assign(node, { chain });
 }
@@ -376,7 +376,7 @@ export interface EnhancedAztecNode<
 }
 
 export async function createIsomorphicTestWallet(node: EnhancedAztecNode) {
-  const { EmbeddedWallet } = await import("@aztec/wallets/embedded");
+  const { EmbeddedWallet } = await import("@aztec-labs/wallets/embedded");
 
   return await EmbeddedWallet.create(node, {
     pxeConfig: {
@@ -384,17 +384,6 @@ export async function createIsomorphicTestWallet(node: EnhancedAztecNode) {
       dataDirectory: "pxe-data",
     },
   });
-}
-
-export function zAztecAddress() {
-  return z.string().regex(/^0x[0-9a-fA-F]{64}$/i);
-}
-
-export function zStringBigInt() {
-  return z
-    .string()
-    .regex(/^[0-9]+$/, "must be a valid big int")
-    .transform((s) => BigInt(s));
 }
 
 export function valuesToLiteralUnion<T extends string | number | boolean>(
@@ -441,8 +430,8 @@ export async function bench(
   node: AztecNode,
   fn: () => Promise<TxHash | TxLike>,
 ): Promise<TxLike> {
-  const { waitForTx } = await import("@aztec/aztec.js/node");
-  const { TxHash } = await import("@aztec/aztec.js/tx");
+  const { waitForTx } = await import("@aztec-labs/aztec.js/node");
+  const { TxHash } = await import("@aztec-labs/aztec.js/tx");
 
   const start = Date.now();
   console.log(`${name} start`);

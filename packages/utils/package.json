@@ -10,10 +10,9 @@
     "test:static:fix": "prettier --write ."
   },
   "dependencies": {
-    "@aztec/aztec.js": "catalog:",
-    "@aztec/foundation": "catalog:",
-    "@aztec/stdlib": "catalog:",
-    "@aztec/wallets": "catalog:",
+    "@aztec-labs/aztec.js": "catalog:",
+    "@aztec-labs/stdlib": "catalog:",
+    "@aztec-labs/wallets": "catalog:",
     "@uniswap/sdk-core": "catalog:",
     "lodash-es": "catalog:",
     "ms": "catalog:",

@@ -1,7 +1,7 @@
-import type { CallIntent } from "@aztec/aztec.js/authorization";
-import type { Contract } from "@aztec/aztec.js/contracts";
-import type { FeePaymentMethod } from "@aztec/aztec.js/fee";
-import type { AccountManager, Wallet } from "@aztec/aztec.js/wallet";
+import type { CallIntent } from "@aztec-labs/aztec.js/authorization";
+import type { Contract } from "@aztec-labs/aztec.js/contracts";
+import type { FeePaymentMethod } from "@aztec-labs/aztec.js/fee";
+import type { AccountManager, Wallet } from "@aztec-labs/aztec.js/wallet";
 import { readDeploymentJsonFiles } from "@nemi-fi/aztec-deploy/client";
 import { sutils } from "@nemi-fi/utils";
 import { assert } from "ts-essentials";
@@ -38,7 +38,7 @@ export class CoreService {
   aztecNode = sutils.lazyValue(async () => {
     const node = await sutils.createAztecNode(this.aztec.chain);
     if (this.#isLocalNetwork()) {
-      const { waitForNode } = await import("@aztec/aztec.js/node");
+      const { waitForNode } = await import("@aztec-labs/aztec.js/node");
       this.logger.log("waiting for node...");
       await waitForNode(node);
       this.logger.log("waited for node");
@@ -57,7 +57,7 @@ export class CoreService {
 
   // TODO(security): remove this as it can be accidentally used to receive funds
   getReadonlyAccount = sutils.lazyValue(async () => {
-    const { Fq, Fr } = await import("@aztec/aztec.js/fields");
+    const { Fq, Fr } = await import("@aztec-labs/aztec.js/fields");
     const wallet = await this.getTestWallet();
     const manager = await wallet.createSchnorrAccount(
       new Fr(123),

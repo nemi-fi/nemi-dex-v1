@@ -16,13 +16,10 @@
   },
   "dependencies": {
     "@aztec-foundation/aztec-standards": "catalog:",
-    "@aztec/accounts": "catalog:",
-    "@aztec/aztec.js": "catalog:",
+    "@aztec-labs/aztec.js": "catalog:",
     "@nemi-fi/utils": "workspace:*",
     "lodash-es": "catalog:",
-    "ox": "catalog:",
-    "ts-essentials": "catalog:",
-    "viem": "catalog:"
+    "ox": "catalog:"
   },
   "devDependencies": {
     "@types/json-diff": "^1.0.3",

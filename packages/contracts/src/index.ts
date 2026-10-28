@@ -1,6 +1,6 @@
-import type { ContractInstanceWithAddress } from "@aztec/aztec.js/contracts";
-import type { AztecNode } from "@aztec/aztec.js/node";
-import type { Wallet } from "@aztec/aztec.js/wallet";
+import type { ContractInstanceWithAddress } from "@aztec-labs/aztec.js/contracts";
+import type { AztecNode } from "@aztec-labs/aztec.js/node";
+import type { Wallet } from "@aztec-labs/aztec.js/wallet";
 import type { TokenContract } from "@nemi-fi/contracts/contracts";
 import { sutils } from "@nemi-fi/utils";
 
@@ -35,7 +35,7 @@ const getSupportedTokenContracts = sutils.lazyValue(async () => {
     ),
     // sutils.lazyValue(async () => {
     //   const { TokenContract } = await import(
-    //     "@aztec/noir-contracts.js/Token"
+    //     "@aztec-labs/noir-contracts.js/Token"
     //   );
     //   return class extends Contract.fromAztec(TokenContract) { };
     // }),
@@ -44,7 +44,7 @@ const getSupportedTokenContracts = sutils.lazyValue(async () => {
     sutils.lazyValue(async () => {
       const contractClass = await getClass();
       const { getContractClassFromArtifact } =
-        await import("@aztec/aztec.js/contracts");
+        await import("@aztec-labs/aztec.js/contracts");
       return {
         jsClass: contractClass,
         onchainClass: await getContractClassFromArtifact(

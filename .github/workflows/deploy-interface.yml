@@ -1,0 +1,70 @@
+name: Deploy interface
+
+on:
+  push:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+      statuses: write
+    # Creates a GitHub deployment, shown in the PR checks with a "View deployment" link
+    environment:
+      name: ${{ github.ref == 'refs/heads/production' && 'production' || github.ref == 'refs/heads/main' && 'staging' || 'preview' }}
+      url: ${{ steps.deploy.outputs.url }}
+    defaults:
+      run:
+        working-directory: apps/interface
+    env:
+      CF_SEND_TELEMETRY: "false"
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # Turborepo remote cache
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+
+      - name: Deploy
+        id: deploy
+        run: |
+          set -o pipefail
+          if [ "$GITHUB_REF" = "refs/heads/production" ]; then
+            pnpm turbo build
+            # cf writes the deploy result (incl. targets) as JSON lines to this file
+            WRANGLER_OUTPUT_FILE_PATH="$RUNNER_TEMP/deploy.json" npx cf deploy --prebuilt --mode production
+            # prefer a custom domain, fall back to the workers.dev URL
+            url=$(jq -r 'select(.type == "deploy") | .targets // [] | ([.[] | select(test("\\(custom domain")) | "https://" + split(" ")[0]] + [.[] | select(startswith("https://"))])[0] // empty' "$RUNNER_TEMP/deploy.json")
+            echo "url=$url" >> "$GITHUB_OUTPUT"
+          else
+            if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+              preview_name=staging
+            else
+              preview_name=""
+            fi
+            pnpm turbo bootstrap
+            # cf prints the deployment result as JSON to stdout
+            npx cf previews deploy $preview_name | tee "$RUNNER_TEMP/preview.json"
+            url=$(jq -r '.preview_urls[0] // .deployment_urls[0] // empty' "$RUNNER_TEMP/preview.json")
+            echo "url=$url" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Report deployment URL in status checks
+        if: steps.deploy.outputs.url != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state=success \
+            -f context="Interface deployment" \
+            -f description="$URL" \
+            -f target_url="$URL"

@@ -1,4 +1,4 @@
-import { GasDimensions } from "@aztec/stdlib/gas";
+import { GasDimensions } from "@aztec-labs/stdlib/gas";
 import fs from "fs";
 import path from "path";
 

@@ -1,5 +1,5 @@
-import type { ContractFunctionInteraction } from "@aztec/aztec.js/contracts";
-import type { TxHash } from "@aztec/aztec.js/tx";
+import type { ContractFunctionInteraction } from "@aztec-labs/aztec.js/contracts";
+import type { TxHash } from "@aztec-labs/aztec.js/tx";
 import { sutils } from "@nemi-fi/utils";
 import { z } from "zod";
 import type { CoreService, LoggerService } from "../sdk.js";
@@ -18,7 +18,7 @@ class TransactionTrackerServiceBase {
     txRequest: BaseFunctionInteraction,
     from: sutils.WalletAccount,
   ) {
-    const { NO_WAIT } = await import("@aztec/aztec.js/contracts");
+    const { NO_WAIT } = await import("@aztec-labs/aztec.js/contracts");
     const { txHash } = await txRequest.send({
       from: from.address,
       fee: {
@@ -39,8 +39,8 @@ class TransactionTrackerServiceBase {
   ) {
     const toastId = crypto.randomUUID();
     const promise = sutils.iife(async () => {
-      const { TxHash } = await import("@aztec/aztec.js/tx");
-      const { waitForTx } = await import("@aztec/aztec.js/node");
+      const { TxHash } = await import("@aztec-labs/aztec.js/tx");
+      const { waitForTx } = await import("@aztec-labs/aztec.js/node");
       let txHash: TxHash;
       if (!(txReq instanceof TxHash)) {
         txHash = await this.#sendTx(txReq, from);
@@ -147,5 +147,5 @@ export class TransactionTrackerService extends TransactionTrackerServiceBase {
   }
 }
 
-// TODO: import from `@aztec/aztec.js` when it is exported
+// TODO: import from `@aztec-labs/aztec.js` when it is exported
 type BaseFunctionInteraction = Pick<ContractFunctionInteraction, "send">;

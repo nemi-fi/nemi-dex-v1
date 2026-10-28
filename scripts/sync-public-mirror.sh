@@ -9,6 +9,7 @@ set -euo pipefail
 MIRROR_URL="${MIRROR_URL:-git@github.com:nemi-fi/nemi-dex-v1.git}"
 MIRROR_BRANCH="${MIRROR_BRANCH:-main}"
 SOURCE_REF="${1:-HEAD}"
+LICENSE_URL="https://www.apache.org/licenses/LICENSE-2.0.txt"
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
@@ -36,6 +37,8 @@ fi
 # replace mirror contents with a snapshot of the source ref (tracked files only)
 git -C "$WORK_DIR" rm -r --quiet --ignore-unmatch .
 git -C "$REPO_ROOT" archive "$SOURCE_SHA" | tar -x -C "$WORK_DIR"
+# the license only applies to the public mirror, so it is not kept in this repo
+curl -fsSL "$LICENSE_URL" -o "$WORK_DIR/LICENSE"
 git -C "$WORK_DIR" add -A
 
 if git -C "$WORK_DIR" diff --cached --quiet; then

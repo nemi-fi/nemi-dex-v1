@@ -11,7 +11,7 @@ export class DeploymentsService {
   getSponsoredDeployer = sutils.lazyValue(async () => {
     if (this.#hasPreDeployedAccounts()) {
       const { getInitialTestAccountsData } =
-        await import("@aztec/accounts/testing");
+        await import("@aztec-labs/accounts/testing");
       const wallet = await this.core.getTestWallet();
 
       const index = 0;

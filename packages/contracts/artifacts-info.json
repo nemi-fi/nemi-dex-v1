@@ -1,20 +1,11 @@
 {
   "pool_manager-PoolManager.json": {
-    "artifactHash": "0x08be392a75f450332936c70c761ed4f000b1884297e7f51a5d5014936378ea44",
-    "id": "0x1b1be37112f247b11cb73c6bc805562d9686e97eaf74206c23396a55328ec97b",
+    "artifactHash": "0x102b30492064d31912483d10e5fa371cc7d318f0cf999f4c85c0f738d24b727d",
+    "id": "0x1cb5954fdbbb1f245fcb4c0ae64a5f0b1d3284ada34385658231ee05421b966c",
     "packedBytecode": 13986,
     "privateFunctions": 5,
-    "privateFunctionsRoot": "0x0d047703daf281118126fe4c617605c31f1163cc6cbb13f523e227a2aef35a45",
-    "publicBytecodeCommitment": "0x25971eb7704138a18f23e241927d8e07193ef028f0f6e418b534bf01df73c475",
-    "version": 1
-  },
-  "token_contract-Token.json": {
-    "artifactHash": "0x26ecbb44dab272751e629b761b634877e387094c20a3e388bac00e74cf4f276d",
-    "id": "0x15c044048d78999f5e53f5aed83c4d398f4a9f8bda631c1670fbfe177fd9a536",
-    "packedBytecode": 20747,
-    "privateFunctions": 9,
-    "privateFunctionsRoot": "0x0ae9d83742cf317e88650b321c29412f45d484968643ade70976f60472b98a40",
-    "publicBytecodeCommitment": "0x22120d9d1eabc593315bd38722b2f32b6afd80e68eacd59828a8588ee2a688d8",
+    "privateFunctionsRoot": "0x05270e064deacbbb49af725ba526dd04ed3cae6b297be7b9c6222e89752e9d03",
+    "publicBytecodeCommitment": "0x0fea111cfdd9f97ed5ecbf8d138f85be738c194b3800f3159f62385ffacda8ce",
     "version": 1
   }
 }

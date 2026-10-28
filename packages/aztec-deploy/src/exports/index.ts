@@ -1,18 +1,24 @@
-import { getAllFunctionAbis, type ContractArtifact } from "@aztec/aztec.js/abi";
-import type { AztecAddress } from "@aztec/aztec.js/addresses";
+import {
+  getAllFunctionAbis,
+  type ContractArtifact,
+} from "@aztec-labs/aztec.js/abi";
+import type { AztecAddress } from "@aztec-labs/aztec.js/addresses";
 import type {
   Contract as AztecContract,
   ContractInstanceWithAddress,
   DeployMethod,
-} from "@aztec/aztec.js/contracts";
-import type { PublicKeys } from "@aztec/aztec.js/keys";
-import { createAztecNodeClient, type AztecNode } from "@aztec/aztec.js/node";
-import type { Wallet } from "@aztec/aztec.js/wallet";
+} from "@aztec-labs/aztec.js/contracts";
+import type { PublicKeys } from "@aztec-labs/aztec.js/keys";
+import {
+  createAztecNodeClient,
+  type AztecNode,
+} from "@aztec-labs/aztec.js/node";
+import type { Wallet } from "@aztec-labs/aztec.js/wallet";
 import {
   computeInitializationHash,
   ContractInstanceWithAddressSchema,
   getContractClassFromArtifact,
-} from "@aztec/stdlib/contract";
+} from "@aztec-labs/stdlib/contract";
 import { sutils } from "@nemi-fi/utils";
 import stringify from "json-stringify-deterministic";
 import { clone, mapValues } from "lodash-es";

@@ -1,6 +1,6 @@
-import type { AztecAddress } from "@aztec/aztec.js/addresses";
-import type { Aliased } from "@aztec/aztec.js/wallet";
-import type { EmbeddedWallet } from "@aztec/wallets/embedded";
+import type { AztecAddress } from "@aztec-labs/aztec.js/addresses";
+import type { Aliased } from "@aztec-labs/aztec.js/wallet";
+import type { EmbeddedWallet } from "@aztec-labs/wallets/embedded";
 import { sutils } from "@nemi-fi/utils";
 import type { CoreService } from "../sdk.js";
 import { getSingleKeyAccount } from "../utils.js";
@@ -10,11 +10,11 @@ import type { Account } from "./WalletService.js";
 export type NamedAccount = Account & { name: string };
 
 /**
- * The embedded ("local") wallet, backed by {@link https://www.npmjs.com/package/@aztec/wallets | EmbeddedWallet}.
+ * The embedded ("local") wallet, backed by {@link https://www.npmjs.com/package/@aztec-labs/wallets | EmbeddedWallet}.
  *
  * Replaces the previous passkey/webauthn wallet: accounts are created and persisted by the
  * EmbeddedWallet itself (IndexedDB in the browser), so nothing secret is stored by this app.
- * On reload {@link https://www.npmjs.com/package/@aztec/wallets | EmbeddedWallet.getAccounts}
+ * On reload {@link https://www.npmjs.com/package/@aztec-labs/wallets | EmbeddedWallet.getAccounts}
  * lists the persisted accounts and the wallet can sign for them directly.
  */
 export class EmbeddedWalletService {
@@ -25,6 +25,7 @@ export class EmbeddedWalletService {
   #wallet: EmbeddedWallet | undefined;
   // Only the selected address is persisted by us, and it is public information.
   readonly #selectedAddress: { current: string | null };
+  #loading: Promise<void> | undefined;
   readonly ready: Promise<unknown>;
 
   constructor(
@@ -35,7 +36,23 @@ export class EmbeddedWalletService {
       `${localStorageKey}-selected-v3`,
       null,
     );
-    this.ready = this.#refresh();
+    // Starting the EmbeddedWallet boots a PXE, which keeps the main thread busy for seconds.
+    // Only do that at startup to restore a session that had an account selected; otherwise
+    // wait until accounts are actually needed (see `load`).
+    this.ready = this.#selectedAddress.current
+      ? this.load()
+      : Promise.resolve();
+  }
+
+  /**
+   * Starts the EmbeddedWallet (once) and loads its accounts. Call before showing the account
+   * list; creating an account starts the wallet on its own.
+   */
+  load(): Promise<void> {
+    return (this.#loading ??= this.#refresh().catch((error) => {
+      this.#loading = undefined; // allow a retry
+      throw error;
+    }));
   }
 
   get allAccounts(): NamedAccount[] {
@@ -91,7 +108,7 @@ export class EmbeddedWalletService {
    * transact immediately without the user holding any funds.
    */
   async createAccount(name?: string): Promise<Account> {
-    const { Fr } = await import("@aztec/aztec.js/fields");
+    const { Fr } = await import("@aztec-labs/aztec.js/fields");
     const wallet = (this.#wallet ??= await this.core.getTestWallet());
 
     const secretKey = Fr.random();

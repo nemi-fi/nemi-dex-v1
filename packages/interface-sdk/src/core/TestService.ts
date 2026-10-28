@@ -10,7 +10,8 @@ export class TestService {
   }
 
   async #deployTestAccount(seed: Hex.Hex) {
-    const { sha256ToField } = await import("@aztec/foundation/crypto/sha256");
+    const { sha256ToField } =
+      await import("@aztec-labs/foundation/crypto/sha256");
 
     const seedBigInt = Hex.toBigInt(seed);
     const secretKey = sha256ToField([seedBigInt]);

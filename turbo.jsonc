@@ -1,0 +1,94 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalEnv": ["!VERCEL_TARGET_ENV"],
+  "tasks": {
+    "//#install-deps": {
+      "cache": false,
+      "inputs": [
+        "!**/node_modules",
+        "!**/.next",
+        "!**/.react-router",
+        "**/package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+      ],
+      "outputs": [],
+    },
+    "bootstrap": {
+      "dependsOn": ["//#install-deps", "^compile", "compile"],
+    },
+    "compile:noir": {
+      "dependsOn": ["//#install-deps", "^compile:noir"],
+      "inputs": [
+        "$TURBO_ROOT$/.aztecrc",
+        "**/*.nr",
+        "**/Nargo.toml",
+        "!package.json",
+        "**/*.sh",
+        "**/scripts/**",
+      ],
+      "outputs": [
+        "**/target/**",
+        "!**/target/cache/**",
+        "**/artifacts/**",
+        "artifacts-info.json",
+      ],
+      "outputLogs": "new-only",
+    },
+    "compile:json-files": {
+      "dependsOn": ["^compile:json-files"],
+      "cache": false,
+    },
+    "compile": {
+      "dependsOn": [
+        "^compile:noir",
+        "compile:noir",
+        "^compile:json-files",
+        "compile:json-files",
+      ],
+    },
+    "build": {
+      "dependsOn": ["^bootstrap", "bootstrap"],
+      "cache": false,
+      // apps/interface builds for Vercel instead of Cloudflare when this is set
+      "passThroughEnv": ["VERCEL"],
+    },
+    "start": {
+      "dependsOn": ["^bootstrap", "bootstrap"],
+      "cache": false,
+      "persistent": true,
+    },
+    "dev": {
+      "dependsOn": ["^bootstrap", "bootstrap"],
+      "cache": false,
+      "persistent": true,
+    },
+    "bench": {
+      "dependsOn": ["^bootstrap", "bootstrap"],
+      "outputs": ["**/*bench.json"],
+      "env": ["BENCH_PROVING_TIME"],
+    },
+    "test:static": {
+      "dependsOn": ["^bootstrap", "bootstrap"],
+      "outputLogs": "new-only",
+    },
+    "test:static:fix": {
+      "dependsOn": ["^bootstrap", "bootstrap"],
+      "cache": false,
+    },
+    "test:runtime": {
+      "dependsOn": ["^bootstrap", "bootstrap"],
+      "outputLogs": "new-only",
+    },
+    "test": {
+      "dependsOn": ["test:static", "test:runtime"],
+      "outputLogs": "new-only",
+    },
+    "aztec:deploy": {
+      "dependsOn": ["^bootstrap", "bootstrap"],
+      "interactive": true,
+      "cache": false,
+      "env": ["CHAIN"],
+    },
+  },
+}

@@ -1,5 +1,5 @@
-import type { ContractFunctionInteraction } from "@aztec/aztec.js/contracts";
-import type { Fr } from "@aztec/aztec.js/fields";
+import type { ContractFunctionInteraction } from "@aztec-labs/aztec.js/contracts";
+import type { Fr } from "@aztec-labs/aztec.js/fields";
 import { tokenContract } from "@nemi-fi/contracts";
 import { sutils } from "@nemi-fi/utils";
 import { L2Token } from "@nemi-fi/v1-sdk";
