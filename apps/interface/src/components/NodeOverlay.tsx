@@ -14,7 +14,7 @@ interface NodeOverlayProps {
 }
 
 const NodeOverlay: FC<NodeOverlayProps> = ({ children }) => {
-  const { theme, themes } = useTheme();
+  const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
   const [showEncryptionBanner, setShowEncryptionBanner] = useState(true);
@@ -37,10 +37,10 @@ const NodeOverlay: FC<NodeOverlayProps> = ({ children }) => {
   }, []);
 
   // Determine if dark mode based on resolvedTheme, with fallback
-  const isDarkMode = mounted ? theme === "dark" : false;
+  const isDarkMode = mounted ? resolvedTheme === "dark" : false;
 
   return (
-    <div className="node-overlay relative w-full h-full overflow-hidden">
+    <div className="node-overlay relative w-full h-full overflow-clip">
       {/* Background elements */}
       {mounted && !isAppRoute && (
         <>

@@ -11,7 +11,7 @@ import type { interfaceSdk } from "@nemi-fi/interface-sdk";
 import { sutils } from "@nemi-fi/utils";
 import type { L2Token, Pool } from "@nemi-fi/v1-sdk";
 import type { CurrencyAmount } from "@uniswap/sdk-core";
-import { ArrowUpFromLine } from "lucide-react";
+import { ArrowLineUpIcon } from "@phosphor-icons/react";
 import {
   createContext,
   type ReactNode,
@@ -255,15 +255,33 @@ export const RemoveLiquidityProvider = ({
     // Run the tx through the shared TxModal so the flow (review -> proving -> sent, with a
     // copyable transaction hash) matches swap.
     modals.show(TxModal, {
+      publicData: [
+        {
+          label: "Action",
+          value: `Remove ${amount0.currency.symbol}/${amount1.currency.symbol} liquidity`,
+        },
+        {
+          label: "LP amount",
+          value: lpAmount,
+        },
+        {
+          label: `${amount0.currency.symbol} amount`,
+          value: `~${sutils.displayCurrencyAmount(amount0)}`,
+        },
+        {
+          label: `${amount1.currency.symbol} amount`,
+          value: `~${sutils.displayCurrencyAmount(amount1)}`,
+        },
+      ],
       details: (
         <>
           <TransactionDetailRow
-            icon={<ArrowUpFromLine className="h-4 w-4" />}
+            icon={<ArrowLineUpIcon className="h-4 w-4" />}
             label="You receive"
             value={`~${sutils.displayCurrencyAmount(amount0)}`}
           />
           <TransactionDetailRow
-            icon={<ArrowUpFromLine className="h-4 w-4" />}
+            icon={<ArrowLineUpIcon className="h-4 w-4" />}
             label="You receive"
             value={`~${sutils.displayCurrencyAmount(amount1)}`}
           />
@@ -283,7 +301,16 @@ export const RemoveLiquidityProvider = ({
         return tx;
       },
     });
-  }, [parsedLpAmount, outputAmounts, pool, account, tokenA, tokenB, navigate]);
+  }, [
+    lpAmount,
+    parsedLpAmount,
+    outputAmounts,
+    pool,
+    account,
+    tokenA,
+    tokenB,
+    navigate,
+  ]);
 
   return (
     <RemoveLiquidityContext.Provider

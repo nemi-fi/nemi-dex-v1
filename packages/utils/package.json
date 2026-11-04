@@ -3,7 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "exports": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./appInfo": "./src/appInfo.ts"
+  },
   "scripts": {
     "test:runtime": "vitest run --pass-with-no-tests",
     "test:static": "tsc --noEmit --emitDeclarationOnly false && prettier --check .",
@@ -12,6 +15,7 @@
   "dependencies": {
     "@aztec-labs/aztec.js": "catalog:",
     "@aztec-labs/stdlib": "catalog:",
+    "@aztec-labs/wallet-sdk": "catalog:",
     "@aztec-labs/wallets": "catalog:",
     "@uniswap/sdk-core": "catalog:",
     "lodash-es": "catalog:",

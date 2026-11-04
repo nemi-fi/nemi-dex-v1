@@ -16,10 +16,12 @@ const lateDiscoveredDeps = ["@radix-ui/react-aspect-ratio"];
 // Vercel sets VERCEL=1 in its build environment. There the server runs as a Node.js function
 // instead of a Cloudflare Worker.
 const isVercel = Boolean(process.env.VERCEL);
+// Vitest sets VITEST. The Cloudflare plugin breaks Vitest startup (`module is not defined`).
+const isVitest = Boolean(process.env.VITEST);
 
 export default defineConfig({
   plugins: [
-    !isVercel && cloudflare({ viteEnvironment: { name: "ssr" } }),
+    !isVercel && !isVitest && cloudflare({ viteEnvironment: { name: "ssr" } }),
     tailwindcss(),
     reactRouter(),
     !isVercel && linkReactRouterClientBuild(),
@@ -32,6 +34,10 @@ export default defineConfig({
   ],
   resolve: {
     tsconfigPaths: true,
+  },
+  // Vercel Web Analytics only exists on Vercel (/_vercel/insights); elsewhere it would 404
+  define: {
+    "import.meta.env.VITE_ON_VERCEL": JSON.stringify(isVercel),
   },
   server: {
     port: 3184,

@@ -1,59 +1,87 @@
 "use client";
-
-import { SiDiscord, SiTelegram, SiX } from "@icons-pack/react-simple-icons";
-import { sutils } from "@nemi-fi/utils";
+import { StaticLogo } from "#/components/StaticLogo.js";
+import { SiTelegram, SiX } from "@icons-pack/react-simple-icons";
+import { appInfo } from "@nemi-fi/utils/appInfo";
 import { Link } from "react-router";
 
-const SOCIAL_LINKS = [
+const LINKS = [
+  // Docs are offline for now; bring this back when docs.nemi.fi is up
+  // { name: "Docs", href: "https://docs.nemi.fi", external: true },
+  { name: "Privacy Policy", href: "/privacy-policy", external: false },
+  { name: "Terms of Service", href: "/terms-of-service", external: false },
+];
+
+const SOCIALS = [
+  { name: "Nemi on X", href: "https://x.com/nemi_fi", Icon: SiX },
   {
-    href: sutils.appInfo.discordLink,
-    label: "Join our Discord community",
-    Icon: SiDiscord,
-  },
-  { href: "https://x.com/nemi_fi", label: "Follow us on Twitter/X", Icon: SiX },
-  {
-    href: "https://t.me/nemi_fi",
-    label: "Join our Telegram channel",
+    name: "Nemi on Telegram",
+    href: appInfo.telegramLink,
     Icon: SiTelegram,
   },
 ];
 
-export const HomeFooter = () => {
+const linkClassName =
+  "text-black/60 transition-colors hover:text-black focus-visible:outline-2 focus-visible:outline-blue-500 dark:text-white/60 dark:hover:text-white";
+
+/** Site footer, on every page (rendered by the root layout): logo, year and socials, then docs and legal links. */
+export function HomeFooter() {
   return (
-    <footer className="sticky bottom-0 z-40 w-full border-t border-neutral-200 bg-background px-4 py-4 shadow-md md:px-6 dark:border-neutral-800">
-      <div className="container mx-auto flex flex-col items-center justify-between gap-4 md:flex-row">
-        {/* Social icons */}
+    <footer
+      className="w-full border-t border-black/15 bg-white px-4 text-sm text-black md:px-6 dark:border-white/15 dark:bg-black dark:text-white"
+      role="contentinfo"
+    >
+      <div className="flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
-          {SOCIAL_LINKS.map(({ href, label, Icon }) => (
-            <Link
-              key={href}
-              to={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground transition-colors hover:text-primary focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-              aria-label={label}
-            >
-              <Icon className="h-5 w-5" color="currentColor" />
-            </Link>
-          ))}
+          <Link to="/" aria-label="Nemi home">
+            <StaticLogo width={80} height={24} />
+          </Link>
+          <span className="text-black/60 dark:text-white/60">
+            © {new Date().getFullYear()} Nemi
+          </span>
+          {/* Navigation blocks carry their own (visually hidden) heading */}
+          <nav aria-labelledby="footer-social-heading">
+            <h2 id="footer-social-heading" className="sr-only">
+              Nemi elsewhere
+            </h2>
+            <ul className="flex items-center gap-4">
+              {SOCIALS.map(({ name, href, Icon }) => (
+                <li key={name} className="flex">
+                  <Link
+                    to={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={name}
+                    className={linkClassName}
+                  >
+                    <Icon size={16} aria-hidden="true" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
-          <Link
-            to="/privacy-policy"
-            className="transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-          >
-            Privacy Policy
-          </Link>
-          <Link
-            to="/terms-of-service"
-            className="transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-          >
-            Terms of Service
-          </Link>
-          <span>© {new Date().getFullYear()} Nemi. All rights reserved.</span>
-        </div>
+        <nav aria-labelledby="footer-links-heading">
+          <h2 id="footer-links-heading" className="sr-only">
+            Legal
+          </h2>
+          <ul className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            {LINKS.map((link) => (
+              <li key={link.name}>
+                <Link
+                  to={link.href}
+                  className={linkClassName}
+                  {...(link.external
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                >
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </footer>
   );
-};
+}

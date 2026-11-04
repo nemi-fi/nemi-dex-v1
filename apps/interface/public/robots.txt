@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /verify-team
+Disallow: /api/
+
+Sitemap: https://nemi.fi/sitemap.xml

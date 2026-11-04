@@ -21,7 +21,10 @@ const MINT_AMOUNTS: Record<string, string> = {
   SOL: "2",
 };
 
-/** "Balance: …" text with optional small action buttons next to it. */
+/**
+ * "Private balance: …" text with optional small action buttons next to it. Swaps and liquidity
+ * spend only private balances, so inputs show only those.
+ */
 export function BalanceRow({
   balance,
   isLoading,
@@ -40,7 +43,7 @@ export function BalanceRow({
   }
   return (
     <div className="flex items-center gap-2 text-xs text-gray-500 sm:text-sm dark:text-gray-400">
-      <span>Balance: {balance}</span>
+      <span>Private balance: {balance}</span>
       {children}
       {onMax && (
         <Button
@@ -59,13 +62,17 @@ export function BalanceRow({
   );
 }
 
-/** The connected wallet's balance of `token`, with Max and (testnet) Mint buttons. */
+/**
+ * The connected wallet's balance of `token`, with Max and Mint buttons. The Mint button is shown
+ * only when `showMintButton` is set and the app is on a testnet chain (testnet or local network).
+ * `token` is `undefined` while the currency list loads; the balance then shows as loading.
+ */
 export function TokenBalanceDisplay({
   token,
   onMaxClick,
   showMintButton,
 }: {
-  token: L2Token;
+  token: L2Token | undefined;
   onMaxClick?: () => void;
   showMintButton?: boolean;
 }) {
@@ -73,7 +80,7 @@ export function TokenBalanceDisplay({
   const balanceResult = useBalance(account, token);
   const isDevEnvironment = useIsDevEnvironment();
 
-  let mintAmountStr = MINT_AMOUNTS[token.symbol ?? ""];
+  let mintAmountStr = MINT_AMOUNTS[token?.symbol ?? ""];
   if (isDevEnvironment && Number(mintAmountStr)) {
     // devs can mint more
     mintAmountStr = (Number(mintAmountStr) * 100).toString();
@@ -81,9 +88,13 @@ export function TokenBalanceDisplay({
 
   const handleMintToken = () => {
     sutils.assertConnected(account);
+    assert(token, "Token is not loaded yet");
     assert(mintAmountStr, `No mint amount found for token: ${token.symbol}`);
     const amount = sutils.parseCurrencyAmount(token, mintAmountStr);
     modals.show(TxModal, {
+      publicData: [
+        { label: "Mint", value: sutils.displayCurrencyAmount(amount) },
+      ],
       sendTx: async () => {
         const tx = await lib.currency.mintPrivate({ to: account, amount });
         tx.wait().then(async () => {
@@ -107,14 +118,14 @@ export function TokenBalanceDisplay({
       onMax={onMaxClick}
       maxDisabled={balanceResult.isLoading}
     >
-      {showMintButton && (
+      {showMintButton && sutils.isTestnet(lib.core.chain.id) && (
         <Button
           variant="outline"
           size="sm"
           className="h-7 rounded-md px-2.5 text-xs font-medium"
           onClick={handleMintToken}
           type="button"
-          aria-label={`Mint ${mintAmountStr} ${token.symbol || ""}`}
+          aria-label={`Mint ${mintAmountStr} ${token?.symbol || ""}`}
         >
           Mint {mintAmountStr}
         </Button>

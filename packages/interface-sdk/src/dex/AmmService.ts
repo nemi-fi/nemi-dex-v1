@@ -5,7 +5,7 @@ import type {
   RemoveLiquidity,
   Swap,
 } from "@nemi-fi/contracts/contracts";
-import { tokenContract } from "@nemi-fi/contracts";
+import { tokenContract } from "../utils.js";
 import type { PoolManagerContract } from "@nemi-fi/contracts/contracts";
 import { sutils } from "@nemi-fi/utils";
 import {
@@ -312,16 +312,13 @@ export class AmmService {
     const poolManager = await this.getPoolManager();
     const [token0, token1] = sutils.sortTokens(tokenA, tokenB);
 
-    const { result } = await poolManager.methods
-      .get_reserves(
+    const result = (await this.core.simulatePublic(
+      poolManager.methods.get_reserves(
         await sutils.resolveAztecAddress(token0),
         await sutils.resolveAztecAddress(token1),
-      )
-      .simulate({
-        from: (await this.core.getReadonlyAccount()).address,
-      });
-    const typed = result as [bigint, bigint];
-    const [reserve0, reserve1] = typed;
+      ),
+    )) as [bigint, bigint];
+    const [reserve0, reserve1] = result;
 
     return await Pool.new(
       sutils.bigIntToCurrencyAmount(token0, reserve0),
@@ -349,9 +346,9 @@ export class AmmService {
 
   async totalSupply(pool: Pool) {
     const poolManager = await this.getPoolManager();
-    const { result: raw } = await poolManager.methods
-      .total_supply(BigInt(pool.poolId))
-      .simulate({ from: (await this.core.getReadonlyAccount()).address });
+    const raw = (await this.core.simulatePublic(
+      poolManager.methods.total_supply(BigInt(pool.poolId)),
+    )) as bigint;
     return new Fraction(raw.toString());
   }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "#/components/ui/badge.js";
-import { X, ArrowRight } from "lucide-react";
+import { ArrowRightIcon, XIcon } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogClose } from "#/components/ui/dialog.js";
 import { modals } from "#/lib/modal.js";
@@ -12,8 +12,8 @@ import { cn } from "#/lib/utils.js";
 // Create the modal component using the eBay NiceModal system
 export const TestnetModal = modals.create(() => {
   const modal = useModal();
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   const handleOpenChange = (open: boolean) => {
     if (!open) modal.remove();
@@ -192,7 +192,7 @@ export const TestnetModal = modals.create(() => {
                   onClick={() => modal.remove()}
                 >
                   <span>Continue to the app</span>
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  <ArrowRightIcon className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </motion.button>
               </DialogClose>
             </motion.div>

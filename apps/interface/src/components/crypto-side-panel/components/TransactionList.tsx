@@ -6,13 +6,13 @@ import { useTransactionData } from "#/lib/queries.js";
 import { lib } from "#/lib/sdk.js";
 import { sutils } from "@nemi-fi/utils";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  ExternalLink,
-  History,
-  Search,
-} from "lucide-react";
+  ArrowSquareOutIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
+  ClockCounterClockwiseIcon,
+  ClockIcon,
+  MagnifyingGlassIcon,
+} from "@phosphor-icons/react";
 import { Link } from "react-router";
 import { useState } from "react";
 import { EmptyState } from "./EmptyState.js";
@@ -77,7 +77,9 @@ export function TransactionList() {
           ) : filteredTransactions.length === 0 ? (
             <div>
               <EmptyState
-                icon={searchQuery ? Search : History}
+                icon={
+                  searchQuery ? MagnifyingGlassIcon : ClockCounterClockwiseIcon
+                }
                 title={
                   searchQuery
                     ? "No Matching Transactions"
@@ -106,7 +108,7 @@ export function TransactionList() {
                 >
                   <div className="flex items-center space-x-4">
                     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Clock className="h-5 w-5 text-primary" />
+                      <ClockIcon className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <div className="font-medium">{tx.description}</div>
@@ -121,7 +123,7 @@ export function TransactionList() {
                     rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-primary transition-colors"
                   >
-                    <ExternalLink className="h-4 w-4" />
+                    <ArrowSquareOutIcon className="h-4 w-4" />
                   </Link>
                 </div>
               ))}
@@ -146,7 +148,7 @@ export function TransactionList() {
                 aria-label="Previous page"
                 className="h-8 w-8"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <CaretLeftIcon className="h-4 w-4" />
               </Button>
 
               <span className="text-sm text-muted-foreground px-2">
@@ -163,7 +165,7 @@ export function TransactionList() {
                 aria-label="Next page"
                 className="h-8 w-8"
               >
-                <ChevronRight className="h-4 w-4" />
+                <CaretRightIcon className="h-4 w-4" />
               </Button>
             </div>
           </nav>

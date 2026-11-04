@@ -4,7 +4,9 @@ import { interfaceSdk } from "@nemi-fi/interface-sdk";
 import type { Pool } from "@nemi-fi/v1-sdk";
 import { L2Token } from "@nemi-fi/v1-sdk";
 import { useQueries, useQuery } from "@tanstack/react-query";
+import type { CurrencyAmount } from "@uniswap/sdk-core";
 import ms from "ms";
+import { useMemo } from "react";
 import { lib } from "./sdk.js";
 
 export function usePools() {
@@ -65,7 +67,7 @@ export function balanceOptions(
   account: interfaceSdk.Account | undefined,
   token?: L2Token,
 ) {
-  const enabled = !!account && !!token;
+  const enabled = !!account && !!token?.address;
 
   // Use React Query to handle the async operation
   const result = {
@@ -110,4 +112,93 @@ export function useBalances(account: interfaceSdk.Account | undefined) {
   });
 
   return balances;
+}
+
+export function publicBalanceOptions(
+  account: interfaceSdk.Account | undefined,
+  token?: L2Token,
+) {
+  const enabled = !!account && !!token?.address;
+  return {
+    queryKey: [
+      "wallet-public-balance",
+      lib.core.chain.id,
+      `${account?.address}`,
+      token?.address,
+    ],
+    queryFn: async () => {
+      if (!enabled) {
+        return null;
+      }
+      return await lib.currency.balanceOfPublic(token, account);
+    },
+    enabled,
+    refetchInterval: ms("1 min"),
+  };
+}
+
+/** Public balances of all currencies, in the same order as `useBalances`. */
+export function usePublicBalances(account: interfaceSdk.Account | undefined) {
+  const currencies = useCurrencies();
+  return useQueries({
+    queries: currencies.map((currency) =>
+      publicBalanceOptions(account, currency),
+    ),
+  });
+}
+
+/** A wallet's private and public balance of one token, for the wallet panel. */
+export type TokenBalance = {
+  private: CurrencyAmount<L2Token>;
+  public: CurrencyAmount<L2Token>;
+  total: CurrencyAmount<L2Token>;
+};
+
+type CombinedQuery<T> =
+  | { status: "pending"; data?: undefined; isLoading: boolean }
+  | { status: "error"; error: Error; data?: undefined; isLoading: false }
+  | { status: "success"; data: T; isLoading: false };
+
+/** Private and public balances of all currencies. Swaps and liquidity spend only private ones. */
+export function useWalletBalances(
+  account: interfaceSdk.Account | undefined,
+): CombinedQuery<TokenBalance | null>[] {
+  const privateBalances = useBalances(account);
+  const publicBalances = usePublicBalances(account);
+  // memoized so `Query` doesn't re-run its error toast effect on every render
+  return useMemo(
+    () =>
+      privateBalances.map((priv, i) =>
+        combineBalanceQueries(priv, publicBalances[i]!),
+      ),
+    [privateBalances, publicBalances],
+  );
+}
+
+function combineBalanceQueries(
+  priv: ReturnType<typeof useBalances>[number],
+  pub: ReturnType<typeof usePublicBalances>[number],
+): CombinedQuery<TokenBalance | null> {
+  const error = priv.error ?? pub.error;
+  if (error) {
+    return { status: "error", error, isLoading: false };
+  }
+  if (priv.status === "pending" || pub.status === "pending") {
+    return {
+      status: "pending",
+      isLoading: priv.isLoading || pub.isLoading,
+    };
+  }
+  return {
+    status: "success",
+    data:
+      priv.data && pub.data
+        ? {
+            private: priv.data,
+            public: pub.data,
+            total: priv.data.add(pub.data),
+          }
+        : null,
+    isLoading: false,
+  };
 }

@@ -3,8 +3,9 @@ const usdFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
-/** `1234.5` -> `"$1,234.50"` */
-export function formatUsd(value: number): string {
+/** `1234.5` -> `"$1,234.50"`, `undefined` (no price) -> `"—"` */
+export function formatUsd(value: number | undefined): string {
+  if (value === undefined) return "—";
   return `$${usdFormatter.format(value)}`;
 }
 

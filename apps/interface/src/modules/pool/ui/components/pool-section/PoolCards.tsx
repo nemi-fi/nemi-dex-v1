@@ -8,7 +8,7 @@ import { usePoolPositions, usePools } from "#/lib/queries.js";
 import { activePillClassName, cn } from "#/lib/utils.js";
 import WalletConnect from "#/modules/home/ui/components/wallet-connect/index.js";
 import { compact, times, uniqBy } from "lodash-es";
-import { Filter, X } from "lucide-react";
+import { FunnelIcon, XIcon } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
 import { PoolCard } from "./PoolCard.js";
 
@@ -164,7 +164,7 @@ function TokenFilter({
           onClick={() => setIsOpen(!isOpen)}
           aria-expanded={isOpen}
         >
-          <Filter className="h-3.5 w-3.5" />
+          <FunnelIcon className="h-3.5 w-3.5" />
           <span className="max-w-[120px] truncate">
             {value ? `Filter: ${value}` : "Filter by token"}
           </span>
@@ -225,7 +225,7 @@ function TokenFilter({
             onClick={() => onChange("")}
             aria-label="Clear token filter"
           >
-            <X className="h-3 w-3" />
+            <XIcon className="h-3 w-3" />
           </Button>
         </Badge>
       )}

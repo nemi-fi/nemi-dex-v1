@@ -1,74 +1,111 @@
 import Image from "#/components/Image.js";
-import { PrivacyInAction } from "./privacy-in-action.js";
+import { SWAPS_OPEN } from "../launch-state.js";
+import { AnimatedDino } from "./animated-dino.js";
+import { CtaLinks } from "./cta-links.js";
+import { Pill } from "./pill.js";
+import { WaitlistForm } from "./waitlist-form.js";
 
-const PUZZLE_PIECES = [
-  {
-    src: "/images/puzzle/blue.svg",
-    size: 180,
-    className: "top-[-8%] left-1/2 animate-float-blue",
-  },
-  {
-    src: "/images/puzzle/green.svg",
-    size: 160,
-    className: "top-[-6%] right-[4%] animate-float-green",
-  },
-  {
-    src: "/images/puzzle/green1.svg",
-    size: 140,
-    className: "top-[35%] left-[-4%] animate-float-green1",
-  },
-  {
-    src: "/images/puzzle/pink.svg",
-    size: 150,
-    className: "bottom-[-4%] left-[15%] animate-float-pink",
-  },
-];
+/** What the dino says when clicked. */
+const DINO_LINE = SWAPS_OPEN ? "Go on, swap." : "Not yet.";
 
 export default function HeroSection() {
   return (
-    <section
-      className="relative flex min-h-[100vh] w-full flex-col items-center justify-center overflow-hidden py-4 text-black sm:py-8 md:py-12 lg:py-16 dark:text-white"
-      aria-labelledby="hero-heading"
-    >
-      {/* Background: dot grid and floating puzzle pieces */}
+    <header className="relative w-full overflow-hidden px-4 pt-12 pb-16 text-black sm:px-6 md:pt-20 md:pb-24 dark:text-white">
+      {/* Dot grid, as on the rest of nemi.fi */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(#0000001a_1.5px,transparent_1.5px)] bg-[size:28px_28px] dark:bg-[radial-gradient(#ffffff1a_1.5px,transparent_1.5px)]"
+        aria-hidden="true"
+      />
+
+      {/* Two faint puzzle pieces cut off by the page edges, as on the old nemi.fi. They are CSS
+          backgrounds, not <img>, so only content images are in the HTML */}
+      <div
+        className="pointer-events-none absolute inset-0 hidden lg:block"
         aria-hidden="true"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(#0000000d_1px,transparent_1px)] bg-[size:25px_25px] opacity-30 dark:bg-[radial-gradient(#ffffff0d_1px,transparent_1px)]" />
-        {PUZZLE_PIECES.map((piece) => (
-          <div
-            key={piece.src}
-            className={`absolute opacity-25 blur-[0.5px] motion-reduce:animate-none ${piece.className}`}
+        <div className="absolute top-1/3 -left-24 aspect-[375/501] w-44 bg-[url(/images/puzzle/green1.svg)] bg-contain bg-no-repeat opacity-[0.12] dark:opacity-20" />
+        <div className="absolute -right-16 bottom-6 aspect-[276/218] w-40 bg-[url(/images/puzzle/blue.svg)] bg-contain bg-no-repeat opacity-[0.14] dark:opacity-20" />
+      </div>
+
+      <div className="relative mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[1.15fr_1fr] lg:gap-10">
+        {/* No entrance animation here: the heading is the largest paint, it should show at once */}
+        <div>
+          <Pill color="green" className="text-xs tracking-wider uppercase">
+            {SWAPS_OPEN ? "Live on Aztec" : "Deployed on Aztec"}
+          </Pill>
+          <h1
+            id="hero-heading"
+            className="mt-6 text-[2.6rem] leading-[1.04] font-bold tracking-[-1.5px] sm:text-6xl sm:tracking-[-2px] xl:text-7xl"
           >
-            <Image
-              src={piece.src}
-              width={piece.size}
-              height={piece.size}
-              alt=""
-              style={{ maxWidth: "none" }}
-            />
-          </div>
-        ))}
-      </div>
+            Private swaps on Aztec.
+            <br />
+            Nobody sees your <RedactedWord>wallet</RedactedWord>.
+          </h1>
+          <p className="mt-6 max-w-md text-lg leading-relaxed text-black/65 dark:text-white/65">
+            Swap tokens without tying the trade to your address.{" "}
+            <span className="font-semibold text-black dark:text-white">
+              Your wallet stays out of sight.
+            </span>
+          </p>
 
-      <div className="z-10 mx-auto mb-4 w-full max-w-3xl text-center animate-in fade-in slide-in-from-bottom-6 duration-700 sm:mb-6 md:mb-8">
-        <h1
-          id="hero-heading"
-          className="mb-3 text-2xl leading-tight font-bold tracking-tight sm:mb-4 sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl"
-        >
-          Private DEX
-        </h1>
-        <p className="mx-auto max-w-2xl px-4 text-xs leading-relaxed text-black/85 sm:px-6 sm:text-sm md:text-base lg:text-lg dark:text-white/85">
-          Nemi is a revolutionary DEX, protecting traders from strategy leaks,
-          copy trading, and doxxing while unlocking trillions in sidelined
-          TradFi capital.
-        </p>
-      </div>
+          <CtaLinks className="mt-9" besideForm />
 
-      <div className="relative z-10 mx-auto mb-8 w-full max-w-3xl px-3 sm:mb-12 sm:px-4 md:px-6">
-        <PrivacyInAction />
+          {SWAPS_OPEN && (
+            <p className="mt-5 text-sm text-black/60 dark:text-white/60">
+              Alpha on Aztec. Only swap what you can afford to lose.
+            </p>
+          )}
+        </div>
+
+        {SWAPS_OPEN ? <StandingDino /> : <WaitlistForm />}
       </div>
-    </section>
+    </header>
+  );
+}
+
+/**
+ * A word in the headline that a black bar wipes over once on load, like a redaction, before it
+ * settles into a soft grey highlight. Without motion only the highlight shows.
+ */
+function RedactedWord({ children }: { children: string }) {
+  return (
+    <span className="relative ml-[0.14em] inline-block [--redact-ink:#000] [--redact-paper:#fff] [--redact-soft:rgb(0_0_0/0.07)] dark:[--redact-ink:#fff] dark:[--redact-paper:#000] dark:[--redact-soft:rgb(255_255_255/0.12)]">
+      <span
+        className="absolute inset-x-[-0.1em] top-[0.1em] bottom-[-0.02em] origin-left animate-redact-bar rounded-[0.14em] bg-(--redact-soft) motion-reduce:animate-none"
+        aria-hidden="true"
+      />
+      <span className="relative animate-redact-text motion-reduce:animate-none">
+        {children}
+      </span>
+    </span>
+  );
+}
+
+/** After launch, when there is no waitlist: the hooded dino on its own, standing on the brand puzzle pieces. */
+function StandingDino() {
+  return (
+    <div className="relative mx-auto flex w-full max-w-sm items-end justify-center pt-16 animate-in fade-in zoom-in-95 duration-700 lg:max-w-md">
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <Image
+          src="/images/puzzle/orange.svg"
+          alt=""
+          width={250}
+          height={201}
+          className="absolute top-0 right-0 w-40 sm:w-52"
+        />
+        <Image
+          src="/images/puzzle/pink.svg"
+          alt=""
+          width={250}
+          height={200}
+          className="absolute bottom-0 left-0 w-36 sm:w-48"
+        />
+      </div>
+      <AnimatedDino
+        line={DINO_LINE}
+        sizes="(min-width: 640px) 208px, 160px"
+        className="w-40 sm:w-52"
+      />
+    </div>
   );
 }

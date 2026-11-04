@@ -53,7 +53,7 @@ export const TokenInput = forwardRef<HTMLInputElement, TokenInputProps>(
       }
       const value = sanitizeAmountInput(
         e.target.value,
-        selectedToken.l2Token.decimals,
+        selectedToken.l2Token?.decimals,
       );
       if (value !== null) {
         setPayValue(value);

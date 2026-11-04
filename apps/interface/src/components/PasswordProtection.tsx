@@ -12,7 +12,7 @@ import { Input } from "#/components/ui/input.js";
 import { Button } from "#/components/ui/button.js";
 import { useAdminAuth } from "#/lib/auth.js";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { LockIcon, UnlockIcon } from "lucide-react";
+import { LockIcon, LockOpenIcon } from "@phosphor-icons/react";
 
 interface PasswordProtectionProps {
   children: React.ReactNode;
@@ -39,7 +39,7 @@ export function PasswordProtection({ children }: PasswordProtectionProps) {
     }
   }, [isAuthenticated]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!password.trim()) {
@@ -48,9 +48,6 @@ export function PasswordProtection({ children }: PasswordProtectionProps) {
     }
 
     setIsUnlocking(true);
-
-    // Add a slight delay to show the loading state
-    await new Promise((resolve) => setTimeout(resolve, 800));
 
     const isValid = authenticate(password);
 
@@ -153,7 +150,7 @@ export function PasswordProtection({ children }: PasswordProtectionProps) {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <UnlockIcon className="h-4 w-4" />
+                    <LockOpenIcon className="h-4 w-4" />
                     <span>Unlock Access</span>
                   </div>
                 )}

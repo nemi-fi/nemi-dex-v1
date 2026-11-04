@@ -19,12 +19,19 @@ interface ExternalConnection {
   readonly unsubscribe: () => void;
 }
 
+/** Matches the wallet-sdk default: a 3x3 grid, 72 bits of security. */
+const VERIFICATION_EMOJI_COUNT = 9;
+
+/** How long to wait for the user to approve the discovery request in their wallet. */
+const WALLET_DISCOVERY_TIMEOUT_MS = 60_000;
+
 export class WalletService {
   readonly #isConnecting = sutils.svelte.state(false);
   readonly #connection = sutils.svelte.state<ExternalConnection | null>(null);
   // Transient: shown during the verify phase, before the connection is confirmed, so it cannot
   // live inside `#connection`.
-  readonly #verificationEmoji = sutils.svelte.state<string>("");
+  readonly #verificationEmojis = sutils.svelte.state<string[] | null>(null);
+  #resolveVerification: ((confirmed: boolean) => void) | null = null;
 
   constructor(
     private core: CoreService,
@@ -48,6 +55,10 @@ export class WalletService {
     return account;
   }
 
+  get isEmbeddedWalletSupported() {
+    return sutils.isTestnet(this.core.chain.id);
+  }
+
   get selectedAccount() {
     if (this.type === WalletType.local) {
       return this.embeddedWallet.selectedAccount;
@@ -68,6 +79,9 @@ export class WalletService {
    * Empty until {@link loadAccounts} has run (or a session was restored at startup).
    */
   get accounts() {
+    if (!this.isEmbeddedWalletSupported) {
+      return [];
+    }
     return this.embeddedWallet.allAccounts;
   }
 
@@ -100,6 +114,9 @@ export class WalletService {
   });
 
   get type() {
+    if (!this.isEmbeddedWalletSupported) {
+      return WalletType.external;
+    }
     return this.#type.current;
   }
 
@@ -108,20 +125,45 @@ export class WalletService {
   }
 
   /**
-   * Emoji fingerprint of the currently connecting/connected external wallet channel. Available
-   * after {@link connectToExternalWallet} has established the secure channel; the user should
-   * check it matches what their wallet displays.
+   * Emoji fingerprint of the external wallet channel awaiting verification, or `null` when nothing
+   * is awaiting verification. The user should check it matches what their wallet displays, then
+   * call {@link confirmVerification} or {@link rejectVerification}.
    */
-  get verificationEmoji() {
-    return this.#verificationEmoji.current;
+  get verificationEmojis() {
+    return this.#verificationEmojis.current;
   }
 
-  /** Discover available external wallet extensions via the Aztec wallet-sdk. */
-  async discoverWallets(): Promise<DiscoveredWallet[]> {
+  /** The user confirmed the emojis match their wallet: finish connecting. */
+  confirmVerification() {
+    this.#resolveVerification?.(true);
+  }
+
+  /** The user says the emojis don't match (or gave up): abort the pending connection. */
+  rejectVerification() {
+    this.#resolveVerification?.(false);
+  }
+
+  /**
+   * Discover available external wallet extensions via the Aztec wallet-sdk.
+   *
+   * A wallet only reveals itself after the user approves the discovery request in it, which can
+   * take a while. So wallets are streamed via `onWalletDiscovered` as they are approved, and the
+   * returned promise resolves once discovery times out or `signal` is aborted.
+   */
+  async discoverWallets({
+    onWalletDiscovered,
+    signal,
+  }: {
+    onWalletDiscovered: (wallet: DiscoveredWallet) => void;
+    signal?: AbortSignal;
+  }): Promise<void> {
     try {
       const { WalletManager } = await import("@aztec-labs/wallet-sdk/manager");
       const wallet = await this.core.getTestWallet();
       const chainInfo = await wallet.getChainInfo();
+      if (signal?.aborted) {
+        return;
+      }
 
       const manager = WalletManager.configure({
         extensions: { enabled: true },
@@ -129,15 +171,17 @@ export class WalletService {
       const discovery = manager.getAvailableWallets({
         appId: this.#getAppId(),
         chainInfo,
-        timeout: 500,
+        timeout: WALLET_DISCOVERY_TIMEOUT_MS,
+        onWalletDiscovered: (provider) => onWalletDiscovered({ provider }),
       });
-      const providers = await sutils.collectAsyncIterable(discovery.wallets);
-      return providers.map((provider) => ({ provider }));
+      signal?.addEventListener("abort", () => discovery.cancel(), {
+        once: true,
+      });
+      await discovery.done;
     } catch (error) {
       this.toast.error(
-        "Failed to discover wallets:" + sutils.errorToString(error),
+        "Failed to discover wallets: " + sutils.errorToString(error),
       );
-      return [];
     }
   }
 
@@ -149,10 +193,24 @@ export class WalletService {
 
       const pending = await provider.establishSecureChannel(this.#getAppId());
 
-      // Show the emoji fingerprint so the user can verify it matches their wallet. If we can't
-      // produce it the user can't verify the channel, so fail instead of connecting blind.
+      // Show the emoji fingerprint and wait for the user to verify it matches their wallet. If we
+      // can't produce it the user can't verify the channel, so fail instead of connecting blind.
       const { hashToEmoji } = await import("@aztec-labs/wallet-sdk/crypto");
-      this.#verificationEmoji.current = hashToEmoji(pending.verificationHash);
+      // One emoji per hash byte, the same sequence `hashToEmoji(hash)` yields, but kept as
+      // separate items so the UI can lay them out as a grid.
+      const emojis = Array.from({ length: VERIFICATION_EMOJI_COUNT }, (_, i) =>
+        hashToEmoji(pending.verificationHash.slice(i * 2, i * 2 + 2), 1),
+      );
+      const confirmed = await new Promise<boolean>((resolve) => {
+        this.#resolveVerification = resolve;
+        this.#verificationEmojis.current = emojis;
+      });
+      this.#resolveVerification = null;
+      this.#verificationEmojis.current = null;
+      if (!confirmed) {
+        pending.cancel();
+        throw new Error("Connection cancelled: the emojis were not confirmed");
+      }
 
       const wallet = await pending.confirm();
 
@@ -193,6 +251,10 @@ export class WalletService {
     try {
       switch (params.type) {
         case WalletType.local: {
+          assert(
+            this.isEmbeddedWalletSupported,
+            `The embedded wallet is not available on ${this.core.chain.name}`,
+          );
           this.#type.current = WalletType.local;
           await this.embeddedWallet.createAccount(params.name);
           break;
@@ -220,9 +282,9 @@ export class WalletService {
    * ask the provider to disconnect (skip it when the provider already went away on its own).
    */
   async #clearConnection(disconnectProvider: boolean) {
+    this.rejectVerification();
     const conn = this.#connection.current;
     this.#connection.current = null;
-    this.#verificationEmoji.current = "";
     if (!conn) {
       return;
     }
@@ -240,14 +302,12 @@ export class WalletService {
 
   #handleUnexpectedDisconnect() {
     void this.#clearConnection(false);
-    this.#type.current = WalletType.local;
-    this.toast.log("Wallet disconnected. Switched to embedded wallet.");
+    this.toast.log("Wallet disconnected.");
   }
 
   async disconnect() {
     if (this.type === WalletType.external) {
       await this.#clearConnection(true);
-      this.#type.current = WalletType.local;
     } else {
       await this.embeddedWallet.deselectAccount();
     }

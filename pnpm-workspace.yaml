@@ -52,8 +52,10 @@ catalog:
 
 verifyDepsBeforeRun: install
 
+overrides:
+  # @vercel/analytics lists @sveltejs/kit as an optional peer; pnpm installs it,
+  # which drags in an old vite@6 we don't use (the interface is React Router)
+  '@vercel/analytics>@sveltejs/kit': '-'
+
 # Only install versions published at least one week ago
 minimumReleaseAge: 10080
-minimumReleaseAgeExclude:
-  - '@aztec-labs/*'
-  - '@aztec-foundation/*'

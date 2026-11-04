@@ -4,7 +4,6 @@
   "type": "module",
   "private": true,
   "exports": {
-    ".": "./src/index.ts",
     "./contracts": "./src/contracts.ts"
   },
   "scripts": {

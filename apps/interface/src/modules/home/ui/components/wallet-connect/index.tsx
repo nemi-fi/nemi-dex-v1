@@ -3,7 +3,7 @@ import { Button } from "#/components/ui/button.js";
 import { useAccount } from "#/hooks/use-account.js";
 import { cn } from "#/lib/utils.js";
 import { sutils } from "@nemi-fi/utils";
-import { Wallet } from "lucide-react";
+import { WalletIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { WalletConnectModal } from "./WalletConnectModal.js";
 
@@ -36,7 +36,7 @@ export const WalletConnect = ({ fullWidth = false }: WalletConnectProps) => {
           <span className="text-sm">
             {sutils.shortenAddress(account.address)}
           </span>
-          <Wallet className="h-4 w-4 opacity-70" aria-hidden="true" />
+          <WalletIcon className="h-4 w-4 opacity-70" aria-hidden="true" />
         </Button>
       </CryptoSidePanel>
     );
@@ -53,7 +53,7 @@ export const WalletConnect = ({ fullWidth = false }: WalletConnectProps) => {
         onClick={() => setShowModal(true)}
         aria-label="Connect Wallet"
       >
-        <Wallet className="mr-2 h-4 w-4" aria-hidden="true" />
+        <WalletIcon className="mr-2 h-4 w-4" aria-hidden="true" />
         Connect Wallet
       </Button>
 

@@ -9,7 +9,7 @@ export default defineConfig({
     observability: {
       enabled: true,
     },
-    // Cache Worker responses that opt in with Cache-Control (e.g. /api/icons). Responses
+    // Cache Worker responses that opt in with Cache-Control. Responses
     // without the header, like SSR pages, are never stored.
     cache: {
       enabled: true,

@@ -1,5 +1,5 @@
 import { getFeeJuiceBalance } from "@aztec-labs/aztec.js/utils";
-import { tokenContract } from "@nemi-fi/contracts";
+import { tokenContract } from "../utils.js";
 import { sutils } from "@nemi-fi/utils";
 import type { L2Token, Trade } from "@nemi-fi/v1-sdk";
 import { type TradeType } from "@uniswap/sdk-core";
@@ -255,11 +255,11 @@ describe(AmmService, () => {
 
     test("constrained simulation", async () => {
       // this test is to test JSON RPC constrained simulation and has nothing to do with the AMM. It was easy to put it here.
-      const { result } = await (
-        await tokenContract(tokenA, alice, await coreSdk.core.aztecNode())
-      ).methods
-        .balance_of_public(alice.address)
-        .simulate({ from: alice.address });
+      const result = await coreSdk.core.simulatePublic(
+        (
+          await tokenContract(tokenA, alice, await coreSdk.core.aztecNode())
+        ).methods.balance_of_public(alice.address),
+      );
       expect(result).toBeTypeOf("bigint");
     });
   });

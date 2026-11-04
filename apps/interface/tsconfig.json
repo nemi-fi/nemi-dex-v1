@@ -2,6 +2,10 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "jsx": "react-jsx",
+    // Vite resolves imports, so type-check the way a bundler resolves them. Under NodeNext,
+    // @phosphor-icons/react's extensionless re-exports resolve to nothing.
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "noEmit": true,
     "types": ["vite/client", "./.cloudflare/types/index.d.ts"],
     "rootDirs": [".", "./.react-router/types"],

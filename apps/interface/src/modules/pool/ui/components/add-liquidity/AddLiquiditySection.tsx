@@ -15,15 +15,17 @@ import { useTokenSelectorModal } from "#/hooks/use-token-selector-modal.js";
 import {
   exceedsBalance,
   isPositiveAmount,
+  safeParseCurrencyAmount,
   sanitizeAmountInput,
 } from "#/lib/amount-input.js";
 import { useBalance } from "#/lib/queries.js";
 import { TokenBalanceDisplay } from "#/components/TokenBalanceDisplay.js";
+import { UsdValueDisplay } from "#/components/UsdValueDisplay.js";
 import { useTokenContext } from "#/modules/home/ui/components/swap-section/TokenContext.js";
 import { TokenSelector } from "#/modules/home/ui/components/swap-section/TokenSelector.js";
 import WalletConnect from "#/modules/home/ui/components/wallet-connect/index.js";
 import { sutils } from "@nemi-fi/utils";
-import { Plus } from "lucide-react";
+import { PlusIcon } from "@phosphor-icons/react";
 import { PoolFormLayout } from "../PoolFormLayout.js";
 import React, { useRef } from "react";
 import {
@@ -43,7 +45,6 @@ const AddLiquidityForm = ({
     setAmountA,
     setAmountB,
     handleNumericInput,
-    isCalculating,
     addLiquidity,
     isPoolExisting,
     allowBothInputs,
@@ -113,7 +114,6 @@ const AddLiquidityForm = ({
     !account ||
     isPoolLoading ||
     isTokensLoading ||
-    isCalculating ||
     !!insufficientToken ||
     !selectedToken?.l2Token?.address ||
     !selectedOutputToken?.l2Token?.address;
@@ -142,7 +142,8 @@ const AddLiquidityForm = ({
     } else if (isPoolExisting === false) {
       return {
         title: `Creating a new ${selectedToken.symbol}-${selectedOutputToken.symbol} pool`,
-        description: "You'll be the first to add liquidity to this pool.",
+        description:
+          "You'll be the first to add liquidity to this pool. The amounts you enter set its starting price.",
         type: "new",
       };
     } else if (isPoolExisting) {
@@ -238,9 +239,14 @@ const AddLiquidityForm = ({
             />
           </AmountField>
         )}
+        {!isLoading && (
+          <UsdValueDisplay
+            amount={safeParseCurrencyAmount(selectedToken?.l2Token, amountA)}
+          />
+        )}
 
         {/* Middle icon */}
-        <FieldDivider icon={<Plus className="h-[18px] w-[18px]" />} />
+        <FieldDivider icon={<PlusIcon className="h-[18px] w-[18px]" />} />
 
         {/* Token B Input */}
         <div className="mb-2 flex items-center justify-between gap-2">
@@ -260,13 +266,7 @@ const AddLiquidityForm = ({
           <AmountFieldSkeleton />
         ) : (
           <AmountField
-            className={
-              allowBothInputs
-                ? "cursor-text"
-                : isCalculating
-                  ? "cursor-wait"
-                  : undefined
-            }
+            className={allowBothInputs ? "cursor-text" : undefined}
             onClick={() => allowBothInputs && tokenBInputRef.current?.focus()}
           >
             <input
@@ -296,6 +296,14 @@ const AddLiquidityForm = ({
               disabled={isLoading || disableTokenSelection}
             />
           </AmountField>
+        )}
+        {!isLoading && (
+          <UsdValueDisplay
+            amount={safeParseCurrencyAmount(
+              selectedOutputToken?.l2Token,
+              amountB,
+            )}
+          />
         )}
 
         {/* Action Button */}

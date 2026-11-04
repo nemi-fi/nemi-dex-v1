@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# start from a clean `target` so stale artifacts do not leak into the codegen/cache
+rm -rf ./target
 pnpm gaztec compile $@
 
 for file in $(find ./target -name "*.json"); do

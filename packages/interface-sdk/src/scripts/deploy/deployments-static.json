@@ -127,6 +127,26 @@
       "version": 2
     }
   },
+  "4218372384": {
+    "PoolManager": {
+      "address": "0x277b6def1ab072e4257d0d6d16a284f35e39f9f3cc01e056f7faf5b0789f091e",
+      "currentContractClassId": "0x1cb5954fdbbb1f245fcb4c0ae64a5f0b1d3284ada34385658231ee05421b966c",
+      "deployer": "0x13349132c0417bbc969eee93915470a91fd7c3e3139240e5007d32f5daa12b98",
+      "immutablesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "initializationHash": "0x2e7e676552b448876ea6d58a348dd18d5af31a4b66751b1956be67bcbe1b4e9e",
+      "originalContractClassId": "0x1cb5954fdbbb1f245fcb4c0ae64a5f0b1d3284ada34385658231ee05421b966c",
+      "publicKeys": {
+        "fbpkMHash": "0x0f124f07811eebfaaa6d31316a2cc5bf255fa118f720e8ff1f2fc0d4aa46d496",
+        "ivpkM": "0x00c044b05b6ca83b9c2dbae79cc1135155956a64e136819136e9947fe5e5866c1c1f0ca244c7cd46b682552bff8ae77dea40b966a71de076ec3b7678f2bdb151",
+        "mspkMHash": "0x14a5d4bde495b8c3a9ba4aed0d4870526e46fdff22d341a2f689ac5a50d10356",
+        "npkMHash": "0x14fbaeaeddaa69be81d404c684e78e9f1a786d225faf8de2ce97c92f67d89a26",
+        "ovpkMHash": "0x0e60ed663a4da5636e2e25a1f1f0c5b27c011c8eaed22bbe61e2a0fd875dd24b",
+        "tpkMHash": "0x082c6d164b0ba073c9dd911100248c8ecd80b03f82f38531856a3c16dadcbef0"
+      },
+      "salt": "0x06add63d0f2422998194083ec54caeccdd2b5b92a4d457ba386a148720fd1d5e",
+      "version": 2
+    }
+  },
   "850140444": {
     "PoolManager": {
       "address": "0x0d2679d7b853dc5a2d4e6a1ff11d75a07a946e358a418b0182bd4aa6fab2de01",

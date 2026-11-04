@@ -3,15 +3,28 @@
 import { useIsMobile } from "#/hooks/use-mobile.js";
 import { StaticLogo } from "#/components/StaticLogo.js";
 import { Button } from "#/components/ui/button.js";
-import { Dialog, DialogContent, DialogHeader } from "#/components/ui/dialog.js";
+import { Dialog, DialogContent, DialogTitle } from "#/components/ui/dialog.js";
 import ThemeToggleButton from "#/components/ui/theme-toggle-button.js";
-import { activePillClassName, cn } from "#/lib/utils.js";
-import { ChevronRight, Menu, Moon, Sun, Wallet } from "lucide-react";
+import { cn } from "#/lib/utils.js";
+import { SiTelegram, SiX } from "@icons-pack/react-simple-icons";
+import { appInfo } from "@nemi-fi/utils/appInfo";
+import {
+  DesktopIcon,
+  ListIcon,
+  MoonIcon,
+  SunIcon,
+} from "@phosphor-icons/react"; // ArrowUpRight: for the docs link, offline for now
 import { useTheme } from "next-themes";
 import { Link, useLocation } from "react-router";
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState, type ReactNode } from "react";
 import { TestnetBadge } from "../../components/testnet-badge/index.js";
-import { WalletConnect } from "../wallet-connect/index.js";
+// The wallet button pulls in the SDK; it is only shown on app pages (and after launch), so load it
+// on demand
+const WalletConnect = lazy(() =>
+  import("../wallet-connect/index.js").then((mod) => ({
+    default: mod.WalletConnect,
+  })),
+);
 
 // Navigation links constant
 const NAV_LINKS = [
@@ -20,63 +33,64 @@ const NAV_LINKS = [
   // { name: "Verify", href: "/verify" },
 ];
 
+/** Socials (and docs, once they are back) at the bottom of the mobile menu, as in the landing footer. */
+const ELSEWHERE = [
+  // Docs are offline for now; bring this back when docs.nemi.fi is up
+  // { name: "Docs", href: "https://docs.nemi.fi", Icon: ArrowUpRight },
+  { name: "X", href: "https://x.com/nemi_fi", Icon: SiX },
+  { name: "Telegram", href: appInfo.telegramLink, Icon: SiTelegram },
+] as const;
+
+/** A link in the mobile menu; `href` may be a route or an in-page anchor like "#faq-heading". */
+export interface MenuLink {
+  readonly name: string;
+  readonly href: string;
+}
+
+/** Small mono label over a group in the mobile menu, like the table headers on the landing. */
+const menuLabelClassName =
+  "font-mono text-[11px] tracking-wider text-black/50 uppercase dark:text-white/50";
+const menuRowClassName =
+  "flex items-center justify-between border-b border-black/10 py-4 text-lg font-medium focus-visible:outline-2 focus-visible:outline-blue-500 dark:border-white/10";
+
 // Theme options constant
 const THEME_OPTIONS = [
-  { name: "Light", value: "light", icon: Sun },
-  { name: "Dark", value: "dark", icon: Moon },
+  { name: "System", value: "system", icon: DesktopIcon },
+  { name: "Light", value: "light", icon: SunIcon },
+  { name: "Dark", value: "dark", icon: MoonIcon },
 ];
-
-// Animation styles for TestnetBadge
-const animatedBadgeClass =
-  "transition-transform hover:scale-105 animate-float cursor-pointer";
-
-// Define the animation in a style tag
-const AnimatedBadgeStyle = () => (
-  <style>{`
-    @keyframes float {
-      0% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(-4px);
-      }
-      100% {
-        transform: translateY(0px);
-      }
-    }
-
-    .animate-float {
-      animation: float 3s ease-in-out infinite;
-    }
-
-    .animate-float:hover {
-      animation-duration: 1.5s;
-    }
-  `}</style>
-);
 
 // Simple theme selector component
 const ThemeSelector = () => {
   const { theme, setTheme } = useTheme();
+  // `theme` is unknown during SSR; highlight nothing until mounted to avoid a hydration mismatch
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div
+      className="inline-flex rounded-full border border-black/15 p-1 dark:border-white/20"
+      role="group"
+      aria-label="Theme"
+    >
       {THEME_OPTIONS.map((option) => {
         const Icon = option.icon;
-        const isActive = theme === option.value;
+        const isActive = mounted && theme === option.value;
         return (
           <button
             key={option.value}
+            type="button"
+            aria-pressed={isActive}
             className={cn(
-              "flex flex-col items-center justify-center p-3 rounded-lg border border-transparent transition-all",
+              "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
               isActive
-                ? activePillClassName
-                : "text-muted-foreground hover:bg-muted hover:scale-105",
+                ? "bg-black text-white dark:bg-white dark:text-black"
+                : "text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white",
             )}
             onClick={() => setTheme(option.value)}
           >
-            <Icon className="h-5 w-5 mb-1" />
-            <span className="text-xs font-medium">{option.name}</span>
+            <Icon className="size-4" aria-hidden="true" />
+            {option.name}
           </button>
         );
       })}
@@ -84,7 +98,26 @@ const ThemeSelector = () => {
   );
 };
 
-export const HomeNavbar = () => {
+/** Navbar props a route can set through its `handle` (see `NavbarHandle`), e.g. the landing's. */
+export interface NavbarProps {
+  readonly action?: ReactNode;
+  readonly pageLinks?: readonly MenuLink[];
+}
+
+/**
+ * Route `handle` shape read by the root layout: the deepest matched route with a `navbar` sets the
+ * navbar's props.
+ */
+export interface NavbarHandle {
+  readonly navbar?: NavbarProps;
+}
+
+/**
+ * Site navbar, on every page (rendered by the root layout). `action` replaces the wallet button on the right and in the mobile menu, e.g. the
+ * landing's "Join the waitlist" before swaps open; the app pages keep the wallet button.
+ * `pageLinks` adds an "On this page" list to the mobile menu (the landing's sections).
+ */
+export const HomeNavbar = ({ action, pageLinks = [] }: NavbarProps = {}) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
@@ -107,15 +140,18 @@ export const HomeNavbar = () => {
 
   return (
     <>
-      <AnimatedBadgeStyle />
       <nav
+        aria-labelledby="main-menu-heading"
         className={cn(
-          "w-full py-2 px-4 md:px-6 flex justify-between items-center border-b backdrop-blur-md transition-all duration-300",
+          "relative w-full py-2 px-4 md:px-6 flex justify-between items-center border-b backdrop-blur-md transition-all duration-300",
           scrolled
             ? "bg-background/95 shadow-sm border-background/20"
             : "bg-background/50",
         )}
       >
+        <h2 id="main-menu-heading" className="sr-only">
+          Menu
+        </h2>
         {/* Left section: Logo and mobile menu button */}
         <div className="flex items-center gap-3">
           <Button
@@ -124,7 +160,7 @@ export const HomeNavbar = () => {
             className="rounded-full md:hidden"
             onClick={() => setModalOpen(true)}
           >
-            <Menu className="h-5 w-5" />
+            <ListIcon className="h-5 w-5" />
             <span className="sr-only">Open menu</span>
           </Button>
 
@@ -134,113 +170,143 @@ export const HomeNavbar = () => {
             ) : (
               <StaticLogo width={110} height={32} />
             )}
-            <div className={`ml-1.5 -mt-1 ${animatedBadgeClass}`}>
-              <TestnetBadge />
-            </div>
           </Link>
+          {/* ALPHA on mainnet, TESTNET on testnet */}
+          <div className="-mt-1 -ml-1.5">
+            <TestnetBadge />
+          </div>
         </div>
 
-        {/* Desktop navigation */}
-        <div className="hidden md:flex items-center justify-center ml-3">
-          <div className="flex space-x-2 bg-muted/30 backdrop-blur-sm p-1 rounded-full border border-border/40">
+        {/* Desktop navigation: centred on the page, not between the uneven left and right sections */}
+        <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <ul className="flex items-center gap-1 bg-muted/30 backdrop-blur-sm p-1 rounded-full border border-border/40">
             {NAV_LINKS.map((link) => (
-              <Link
-                key={link.name}
-                to={link.href}
-                className={cn(
-                  "text-sm font-medium px-5 py-2 rounded-full transition-all",
-                  pathname.startsWith(link.href)
-                    ? "bg-background/80 text-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-background/80",
-                )}
-                onClick={() => handleNavClick(link.href)}
-                prefetch="intent"
-              >
-                {link.name}
-              </Link>
+              <li key={link.name}>
+                <Link
+                  to={link.href}
+                  className={cn(
+                    "block text-sm leading-5 font-medium px-5 py-1.5 rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-blue-500",
+                    pathname.startsWith(link.href)
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
+                  )}
+                  onClick={() => handleNavClick(link.href)}
+                  prefetch="intent"
+                >
+                  {link.name}
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
 
         {/* Right section: Theme toggle and wallet */}
         <div className="flex items-center gap-3">
           <div className="hidden md:block">
-            <ThemeToggleButton variant="circle" start="bottom-left" />
+            <ThemeToggleButton />
           </div>
-          <WalletConnect />
+          {action ?? (
+            <Suspense fallback={null}>
+              <WalletConnect />
+            </Suspense>
+          )}
         </div>
       </nav>
 
-      {/* Mobile menu dialog */}
+      {/* Mobile menu: plain rows and mono labels, like the landing's tables and FAQ */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="max-w-none w-full h-[100dvh] p-0 m-0 rounded-none border-none data-[state=open]:slide-in-from-bottom-full data-[state=closed]:slide-out-to-bottom-full duration-300">
-          <DialogHeader className="border-b bg-background/90 backdrop-blur-md px-6 py-5 flex flex-row items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center">
-                <StaticLogo width={80} height={24} />
-                <div className={`ml-1.5 -mt-1 ${animatedBadgeClass}`}>
-                  <TestnetBadge />
-                </div>
-              </div>
-              <span className="text-xs text-muted-foreground tracking-wide uppercase">
-                Decentralized Exchange
-              </span>
+        <DialogContent className="m-0 flex h-[100dvh] w-full max-w-none flex-col gap-0 rounded-none border-none bg-white p-0 text-black duration-300 data-[state=closed]:slide-out-to-bottom-full data-[state=open]:slide-in-from-bottom-full dark:bg-black dark:text-white">
+          <div className="flex items-center px-6 pt-5 pb-4">
+            <Link
+              to="/"
+              aria-label="Nemi home"
+              onClick={() => setModalOpen(false)}
+            >
+              <StaticLogo width={88} height={26} />
+            </Link>
+            <div className="-mt-1 ml-1.5">
+              <TestnetBadge />
             </div>
-          </DialogHeader>
+            <DialogTitle className="sr-only">Menu</DialogTitle>
+          </div>
 
-          <div className="px-6 py-5 overflow-y-auto bg-background/95 backdrop-blur-md h-full">
-            <div className="mb-6 bg-card/80 backdrop-blur-sm rounded-xl border p-4 shadow-sm">
-              <div className="flex items-center mb-2">
-                <Wallet className="h-4 w-4 mr-2" />
-                <span className="font-medium">Connect Wallet</span>
+          <div className="flex flex-1 flex-col overflow-y-auto px-6 pb-8">
+            {action ? (
+              // Close the menu when its action is used (e.g. the waitlist form opening in a new tab)
+              <div className="mt-2" onClick={() => setModalOpen(false)}>
+                {action}
               </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Connect your wallet to access all features
-              </p>
-              <WalletConnect fullWidth />
-            </div>
+            ) : (
+              <div className="mt-2">
+                <Suspense fallback={null}>
+                  <WalletConnect fullWidth />
+                </Suspense>
+              </div>
+            )}
 
-            {/* Navigation section */}
+            {pageLinks.length > 0 && (
+              <nav aria-labelledby="menu-page-heading" className="mt-8">
+                <h2 id="menu-page-heading" className={menuLabelClassName}>
+                  On this page
+                </h2>
+                <ul className="mt-2 border-t border-black/10 dark:border-white/10">
+                  {pageLinks.map((link) => (
+                    <li key={link.href}>
+                      <a
+                        href={link.href}
+                        className={menuRowClassName}
+                        onClick={() => setModalOpen(false)}
+                      >
+                        {link.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
 
-            <div className="mb-6">
-              <h3 className="text-xs font-medium uppercase text-muted-foreground tracking-wider mb-3 flex items-center">
-                <div className="h-1.5 w-1.5 rounded-full bg-primary/70 mr-2"></div>
-                Navigation Menu
-              </h3>
-              <div className="rounded-xl border bg-card/80 backdrop-blur-sm overflow-hidden shadow-sm">
-                {NAV_LINKS.map((link) => {
-                  const isActive = pathname.startsWith(link.href);
-
-                  return (
+            <nav aria-labelledby="menu-app-heading" className="mt-8">
+              <h2 id="menu-app-heading" className={menuLabelClassName}>
+                App
+              </h2>
+              <ul className="mt-2 border-t border-black/10 dark:border-white/10">
+                {NAV_LINKS.map((link) => (
+                  <li key={link.name}>
                     <Link
-                      key={link.name}
                       to={link.href}
                       className={cn(
-                        "flex items-center justify-between px-4 py-3 transition-all block w-full",
-                        isActive ? activePillClassName : "hover:bg-muted/50",
+                        menuRowClassName,
+                        pathname.startsWith(link.href)
+                          ? "text-black dark:text-white"
+                          : "text-black/70 dark:text-white/70",
                       )}
                       onClick={() => handleNavClick(link.href)}
                       prefetch="intent"
                     >
-                      <div className="flex items-center gap-2 justify-between">
-                        <span>{link.name}</span>
-                        <ChevronRight className="h-4 w-4 opacity-50" />
-                      </div>
+                      {link.name}
                     </Link>
-                  );
-                })}
-              </div>
-            </div>
+                  </li>
+                ))}
+              </ul>
+            </nav>
 
-            {/* Theme section */}
-            <div>
-              <h3 className="text-xs font-medium uppercase text-muted-foreground tracking-wider mb-3 flex items-center">
-                <div className="h-1.5 w-1.5 rounded-full bg-primary/70 mr-2"></div>
-                Theme Settings
-              </h3>
-              <div className="rounded-xl border bg-card/80 backdrop-blur-sm p-4 shadow-sm">
-                <ThemeSelector />
-              </div>
+            <div className="mt-auto flex flex-wrap items-center justify-between gap-4 pt-10">
+              <ul className="flex items-center gap-5 text-sm font-medium">
+                {ELSEWHERE.map(({ name, href, Icon }) => (
+                  <li key={name}>
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
+                    >
+                      <Icon size={14} className="size-3.5" aria-hidden="true" />
+                      {name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <ThemeSelector />
             </div>
           </div>
         </DialogContent>

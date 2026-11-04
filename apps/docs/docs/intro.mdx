@@ -5,7 +5,7 @@ description: Privacy-first decentralized exchange built on [Aztec](https://aztec
 slug: /
 ---
 
-import { telegramLink } from "../src/index";
+import { appInfo } from "@nemi-fi/utils/appInfo";
 
 # Welcome to Nemi
 
@@ -75,19 +75,8 @@ Nemi is a **privacy DEX** built Aztec. Trade tokens while keeping your identity 
 ## Support
 
 <div class="help-cards">
-  {/* <a
-    href={discordLink}
-    class="help-card"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <div>
-      <h4>Discord</h4>
-      <p>Community & support</p>
-    </div>
-  </a> */}
   <a
-    href={telegramLink}
+    href={appInfo.telegramLink}
     class="help-card"
     target="_blank"
     rel="noopener noreferrer"

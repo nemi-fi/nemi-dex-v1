@@ -12,23 +12,35 @@ import { useModal } from "@ebay/nice-modal-react";
 import { sutils } from "@nemi-fi/utils";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import {
-  AlertTriangle,
-  Check,
-  CheckCircle2,
-  Clock,
-  Copy,
-  ExternalLink,
-  Loader2,
-  Shield,
-  X,
-} from "lucide-react";
+  ArrowSquareOutIcon,
+  CheckCircleIcon,
+  CheckIcon,
+  CircleNotchIcon,
+  CopyIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  ShieldIcon,
+  WarningIcon,
+  XIcon,
+} from "@phosphor-icons/react";
 import { Link } from "react-router";
 import React, { useState } from "react";
 import { UnreachableCaseError } from "ts-essentials";
 import { LoadingButton } from "./LoadingButton.js";
+/** A piece of transaction data that anyone can read on-chain. */
+export interface PublicDataItem {
+  label: string;
+  value: React.ReactNode;
+}
+
 interface Props {
   sendTx: () => Promise<sutils.TxLike>;
   details?: React.ReactNode;
+  /**
+   * What the transaction reveals on-chain (tokens and amounts). Shown on the confirm screen next
+   * to what stays private (the user's address), so the user knows what they disclose.
+   */
+  publicData?: PublicDataItem[];
 }
 
 type TxState =
@@ -59,20 +71,19 @@ function CopyableHash({ hash }: { hash: string }) {
     >
       {sutils.shortenTxHash(hash)}
       {copied ? (
-        <Check className="h-3.5 w-3.5 text-green-500" aria-hidden="true" />
+        <CheckIcon className="h-3.5 w-3.5 text-green-500" aria-hidden="true" />
       ) : (
-        <Copy className="h-3.5 w-3.5 opacity-60" aria-hidden="true" />
+        <CopyIcon className="h-3.5 w-3.5 opacity-60" aria-hidden="true" />
       )}
     </button>
   );
 }
 
-export const TxModal = modals.create<Props>(({ details, sendTx }) => {
+export const TxModal = modals.create<Props>((props) => {
+  const { details, sendTx, publicData } = props;
   const modal = useModal();
   const [txState, setTxState] = useState<TxState>({ type: "confirm" });
   const canCloseModal = txState.type !== "proving";
-
-  const estimatedTime = "~2 minutes";
 
   // Handle confirmation and transaction execution
   const handleConfirm = async () => {
@@ -136,43 +147,26 @@ export const TxModal = modals.create<Props>(({ details, sendTx }) => {
               {/* Transaction header with privacy indicator */}
               <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/20 border-b flex justify-between items-center relative z-10">
                 <div className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
-                  <Shield className="h-4 w-4 text-blue-500" />
+                  <ShieldIcon className="h-4 w-4 text-blue-500" />
                   Privacy-Protected Transaction
                 </div>
               </div>
+
+              <PrivacySummary publicData={publicData ?? []} />
             </div>
 
             {/* Transaction details */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold">Transaction Details</h3>
-              </div>
+            {details && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">Transaction Details</h3>
+                </div>
 
-              <div className="w-full space-y-2 rounded-lg border p-3 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 backdrop-blur-sm shadow-sm">
-                {details}
-                <TransactionDetailRow
-                  icon={<Clock size={12} className="h-4 w-4" />}
-                  label="Estimated Time"
-                  value={estimatedTime}
-                  bgClass="bg-purple-50 dark:bg-purple-900/20"
-                />
-                <TransactionDetailRow
-                  icon={<Shield className="h-4 w-4" />}
-                  label="Network Fee"
-                  value={
-                    <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                      <span className="text-xs text-zinc-400 dark:text-zinc-500 line-through">
-                        ~$2.50
-                      </span>
-                      <span className="text-xs text-green-500 font-medium">
-                        Sponsored by Nemi
-                      </span>
-                    </div>
-                  }
-                  bgClass="bg-emerald-50 dark:bg-emerald-900/20"
-                />
+                <div className="w-full space-y-2 rounded-lg border p-3 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 backdrop-blur-sm shadow-sm">
+                  {details}
+                </div>
               </div>
-            </div>
+            )}
           </motion.div>
         );
 
@@ -213,7 +207,7 @@ export const TxModal = modals.create<Props>(({ details, sendTx }) => {
                       ease: "linear",
                     }}
                   >
-                    <Loader2 size={48} className="text-blue-500" />
+                    <CircleNotchIcon size={48} className="text-blue-500" />
                   </motion.div>
                 </div>
               </div>
@@ -259,7 +253,7 @@ export const TxModal = modals.create<Props>(({ details, sendTx }) => {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <CheckCircle2 className="h-16 w-16 text-green-500" />
+              <CheckCircleIcon className="h-16 w-16 text-green-500" />
             </motion.div>
 
             <motion.div
@@ -316,7 +310,7 @@ export const TxModal = modals.create<Props>(({ details, sendTx }) => {
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.1, duration: 0.3 }}
                   >
-                    <AlertTriangle size={48} />
+                    <WarningIcon size={48} />
                   </motion.div>
                 </div>
               </div>
@@ -374,7 +368,7 @@ export const TxModal = modals.create<Props>(({ details, sendTx }) => {
                 to={lib.core.explorerUrl.tx(txState.tx.hash)}
                 target="_blank"
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <ArrowSquareOutIcon className="h-4 w-4 mr-2" />
                 View on Explorer
               </Link>
             </Button>
@@ -437,7 +431,7 @@ export const TxModal = modals.create<Props>(({ details, sendTx }) => {
                 className="h-10 w-10"
                 onClick={handleClose}
               >
-                <X className="h-5 w-5" />
+                <XIcon className="h-5 w-5" />
               </Button>
             </div>
             <h2 className="text-xl md:text-2xl font-semibold">
@@ -517,6 +511,59 @@ export const TxModal = modals.create<Props>(({ details, sendTx }) => {
     </ResponsiveModal>
   );
 });
+
+/** Splits the transaction's data into what is visible on-chain and what stays private. */
+function PrivacySummary({ publicData }: { publicData: PublicDataItem[] }) {
+  return (
+    <div className="relative z-10 divide-y text-xs">
+      {publicData.length > 0 && (
+        <div className="p-3 space-y-1.5">
+          <div className="flex items-center gap-1.5 font-medium text-zinc-700 dark:text-zinc-300">
+            <EyeIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            Public
+            <span className="font-normal text-zinc-500 dark:text-zinc-400">
+              · visible to anyone on-chain
+            </span>
+          </div>
+          <dl className="space-y-1">
+            {publicData.map((item) => (
+              <div
+                key={item.label}
+                className="flex justify-between items-center gap-3"
+              >
+                <dt className="text-zinc-600 dark:text-zinc-400">
+                  {item.label}
+                </dt>
+                <dd className="font-medium text-zinc-800 dark:text-zinc-200 text-right">
+                  {item.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
+      <div className="p-3 space-y-1.5">
+        <div className="flex items-center gap-1.5 font-medium text-blue-700 dark:text-blue-300">
+          <EyeSlashIcon className="h-3.5 w-3.5" aria-hidden="true" />
+          Private
+          <span className="font-normal text-zinc-500 dark:text-zinc-400">
+            · hidden by zero-knowledge proofs
+          </span>
+        </div>
+        <dl>
+          <div className="flex justify-between items-center gap-3">
+            <dt className="text-zinc-600 dark:text-zinc-400">
+              Your wallet address
+            </dt>
+            <dd className="font-medium text-blue-700 dark:text-blue-300">
+              Hidden
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  );
+}
 
 // Compact transaction detail row
 export const TransactionDetailRow = ({

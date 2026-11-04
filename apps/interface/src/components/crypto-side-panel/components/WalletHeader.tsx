@@ -7,21 +7,21 @@ import {
   TooltipTrigger,
 } from "#/components/ui/tooltip.js";
 import { useAccount } from "#/hooks/use-account.js";
-import { useBalances } from "#/lib/queries.js";
+import { useWalletBalances } from "#/lib/queries.js";
 import { lib } from "#/lib/sdk.js";
 import { formatUsd } from "#/lib/format.js";
-import { calculateUsdValue } from "#/lib/prices.js";
+import { useUsdValue } from "#/lib/prices.js";
 import { interfaceSdk } from "@nemi-fi/interface-sdk";
 import { sutils } from "@nemi-fi/utils";
 import { compact, sum } from "lodash-es";
 import {
-  Check,
-  CircleDollarSign,
-  Copy,
-  ExternalLink,
-  Fingerprint,
-  LogOut,
-} from "lucide-react";
+  ArrowSquareOutIcon,
+  CheckIcon,
+  CopyIcon,
+  CurrencyCircleDollarIcon,
+  FingerprintIcon,
+  SignOutIcon,
+} from "@phosphor-icons/react";
 import { Link } from "react-router";
 import { useCopyToClipboard } from "#/hooks/use-copy-to-clipboard.js";
 
@@ -30,12 +30,17 @@ interface WalletHeaderProps {}
 export function WalletHeader({}: WalletHeaderProps) {
   const { copied, copy } = useCopyToClipboard();
   const account = useAccount();
-  const balances = useBalances(account);
+  const balances = useWalletBalances(account);
 
-  // Calculate total balance in USD
-  const totalBalance = sum(
-    compact(balances.map((x) => x.data)).map((x) => calculateUsdValue(x)),
-  );
+  // Total balance in USD. Tokens without a price are left out of the total.
+  const { prices, calculateUsdValue } = useUsdValue();
+  const totalBalance = prices
+    ? sum(
+        compact(balances.map((x) => x.data?.total)).map(
+          (x) => calculateUsdValue(x) ?? 0,
+        ),
+      )
+    : undefined;
 
   const handleDisconnect = async () => {
     await lib.wallet.disconnect();
@@ -66,7 +71,7 @@ export function WalletHeader({}: WalletHeaderProps) {
               <div className="flex items-center gap-2 mb-2">
                 <div className="text-xs text-white/60 flex items-center gap-1.5 bg-white/10 rounded-full py-1 px-2.5">
                   {lib.wallet.type === interfaceSdk.WalletType.local && (
-                    <Fingerprint className="h-3 w-3" />
+                    <FingerprintIcon className="h-3 w-3" />
                   )}
                   <span className="font-medium">{lib.wallet.type}</span>
                 </div>
@@ -82,7 +87,7 @@ export function WalletHeader({}: WalletHeaderProps) {
                     className="text-white/60 hover:text-white hover:bg-white/10 h-8 w-8 rounded-full"
                     onClick={handleDisconnect}
                   >
-                    <LogOut className="h-4 w-4" />
+                    <SignOutIcon className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Disconnect wallet</TooltipContent>
@@ -109,7 +114,7 @@ export function WalletHeader({}: WalletHeaderProps) {
 
           <div className="flex items-center justify-between bg-white/10 rounded-lg px-3 py-2.5">
             <div className="flex items-center gap-2">
-              <CircleDollarSign className="h-4 w-4 text-white/60" />
+              <CurrencyCircleDollarIcon className="h-4 w-4 text-white/60" />
               <span className="text-sm font-medium text-white/90">
                 {sutils.shortenAddress(account?.address || "")}
               </span>
@@ -120,9 +125,9 @@ export function WalletHeader({}: WalletHeaderProps) {
                 onClick={copyToClipboard}
               >
                 {copied ? (
-                  <Check className="h-3.5 w-3.5" />
+                  <CheckIcon className="h-3.5 w-3.5" />
                 ) : (
-                  <Copy className="h-3.5 w-3.5" />
+                  <CopyIcon className="h-3.5 w-3.5" />
                 )}
               </IconAction>
               <IconAction tooltip="View on explorer" asChild>
@@ -132,7 +137,7 @@ export function WalletHeader({}: WalletHeaderProps) {
                   rel="noopener noreferrer"
                   aria-label="View on explorer"
                 >
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  <ArrowSquareOutIcon className="h-3.5 w-3.5" />
                 </Link>
               </IconAction>
             </div>

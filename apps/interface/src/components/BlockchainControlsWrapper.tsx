@@ -3,7 +3,7 @@
 import { BlockchainControls } from "#/components/BlockchainControls.js";
 import { Button } from "#/components/ui/button.js";
 import { useAdminAuth } from "#/lib/auth.js";
-import { LogOutIcon } from "lucide-react";
+import { SignOutIcon } from "@phosphor-icons/react";
 
 export function BlockchainControlsWrapper() {
   const { logout } = useAdminAuth();
@@ -17,7 +17,7 @@ export function BlockchainControlsWrapper() {
           onClick={logout}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
         >
-          <LogOutIcon className="h-4 w-4" />
+          <SignOutIcon className="h-4 w-4" />
           <span>Logout</span>
         </Button>
       </div>

@@ -32,7 +32,7 @@ export function TokenIcon({
       style={size ? { width: size, height: size } : undefined}
       title={token?.name || symbol}
     >
-      {token && failedSrc !== src ? (
+      {token && src && failedSrc !== src ? (
         <img
           src={src}
           alt={symbol}

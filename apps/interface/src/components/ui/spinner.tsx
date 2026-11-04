@@ -1,9 +1,9 @@
 import { cn } from "#/lib/utils.js";
-import { Loader2 } from "lucide-react";
+import { CircleNotchIcon } from "@phosphor-icons/react";
 
 export function Spinner({ className }: { className?: string }) {
   return (
-    <Loader2
+    <CircleNotchIcon
       className={cn("h-8 w-8 animate-spin text-blue-600", className)}
       aria-label="Loading"
     />

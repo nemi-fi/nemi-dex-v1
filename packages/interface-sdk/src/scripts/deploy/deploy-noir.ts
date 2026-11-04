@@ -17,18 +17,32 @@ import fs from "node:fs";
 import path from "node:path";
 import { assert } from "ts-essentials";
 import { createCoreForDeploying, CurrencyListSchema } from "../../sdk.js";
+import { getDeployConfig } from "./deploy-config.js";
 
 export async function deployAllAndSaveForTokenList(
   sdk: ReturnType<typeof createCoreForDeploying>,
 ) {
   const chain = sdk.core.chain;
   const deployer = await sdk.deployments.getSponsoredDeployer();
-  await sdk.deployments.deploySponsoredFpc();
+  if (sutils.isTestnet(chain.id)) {
+    await sdk.deployments.deploySponsoredFpc();
+  }
   const minter = (await sdk.core.getReadonlyAccount()).address;
+
+  const configuredAdmin = getDeployConfig(chain.id).poolManagerAdmin;
+  const admin =
+    configuredAdmin === "deployer"
+      ? deployer.address
+      : await sutils.resolveAztecAddress(configuredAdmin);
 
   const aztecDeploy = new AztecDeploy(import.meta.dirname, chain, deployer);
 
-  const allModules = { poolManagerModule, tokensModule: tokensModule(minter) };
+  const allModules: Record<string, ReturnType<typeof buildModule>> = {
+    poolManagerModule: poolManagerModule(admin),
+    ...(sutils.isTestnet(chain.id)
+      ? { tokensModule: tokensModule(minter) }
+      : {}),
+  };
 
   for (const [moduleName, module] of Object.entries(allModules)) {
     console.log(`${moduleName} visualization:`);
@@ -52,7 +66,9 @@ export async function deployAllAndSaveForTokenList(
     mapValues(allModules, (m) => aztecDeploy.deploy(m)),
   );
 
-  await saveToCurrencyList(chain, deployedModules.tokensModule);
+  if (deployedModules.tokensModule) {
+    await saveToCurrencyList(chain, deployedModules.tokensModule);
+  }
 }
 
 export const tokensParameters = {
@@ -64,7 +80,7 @@ export const tokensParameters = {
   SOL: { name: "Solana", decimals: 9 },
 };
 
-export const tokensModule = (minter: AztecAddress) =>
+const tokensModule = (minter: AztecAddress) =>
   buildModule((m) => {
     const tokensParametersToUse =
       process.env.NODE_ENV === "test"
@@ -86,12 +102,11 @@ export const tokensModule = (minter: AztecAddress) =>
     return tokens;
   });
 
-export const poolManagerModule = buildModule((m) => {
-  const poolManager = m.contract(PoolManagerContract, "constructor", [
-    m.deployer.address,
-  ]);
-  return { poolManager };
-});
+const poolManagerModule = (admin: AztecAddress) =>
+  buildModule((m) => {
+    const poolManager = m.contract(PoolManagerContract, "constructor", [admin]);
+    return { poolManager };
+  });
 
 async function saveToCurrencyList(
   chain: sutils.AvmChain,

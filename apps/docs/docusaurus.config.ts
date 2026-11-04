@@ -1,7 +1,7 @@
 import type * as Preset from "@docusaurus/preset-classic";
 import type { Config } from "@docusaurus/types";
 import { themes as prismThemes } from "prism-react-renderer";
-import { telegramLink } from "./src";
+import { appInfo } from "@nemi-fi/utils/appInfo";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -138,7 +138,7 @@ const config: Config = {
       },
       items: [
         {
-          href: telegramLink,
+          href: appInfo.telegramLink,
           position: "right",
           className: "header-telegram-link",
           "aria-label": "Telegram community",

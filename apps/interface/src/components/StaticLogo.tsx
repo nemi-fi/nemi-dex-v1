@@ -37,7 +37,7 @@ export const StaticLogo: FC<StaticLogoProps> = ({
   return (
     <Image
       src={fullLogo ? srcFullLogo : srcShortLogo}
-      alt="Logo"
+      alt="Nemi"
       width={width}
       height={height}
       className={className}

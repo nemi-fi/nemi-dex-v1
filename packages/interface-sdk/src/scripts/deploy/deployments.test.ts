@@ -18,15 +18,16 @@ import deploymentsStatic from "./deployments-static.json" with { type: "json" };
 
 // Every contract the production code loads from `deployments-static.json`, keyed by
 // deployment name. Must stay in sync with the modules in `deploy-noir.ts`.
-const expectedArtifacts: Record<string, ContractArtifact> = {
+const tokenSymbols = (chain: sutils.AvmChain) =>
+  sutils.isTestnet(chain.id) ? Object.keys(tokensParameters) : [];
+const getExpectedArtifacts = (
+  chain: sutils.AvmChain,
+): Record<string, ContractArtifact> => ({
   PoolManager: PoolManagerContract.artifact,
   ...Object.fromEntries(
-    Object.keys(tokensParameters).map((symbol) => [
-      symbol,
-      TokenContract.artifact,
-    ]),
+    tokenSymbols(chain).map((symbol) => [symbol, TokenContract.artifact]),
   ),
-};
+});
 
 // local network is redeployed from scratch on every `aztec:deploy`, so its entries are not tracked
 const deployedChains = Object.entries(sutils.supportedAvmChains)
@@ -48,6 +49,7 @@ describe.each(deployedChains)(
   "deployments on $chainName",
   ({ chainName, chain }) => {
     const chainDeployments = deployments[chain.id] ?? {};
+    const expectedArtifacts = getExpectedArtifacts(chain);
 
     test("all contracts are deployed", () => {
       expect(Object.keys(chainDeployments).sort()).toEqual(
@@ -80,7 +82,7 @@ describe.each(deployedChains)(
         Object.fromEntries(tokens.map((t) => [t.symbol, t.address])),
       ).toEqual(
         Object.fromEntries(
-          Object.keys(tokensParameters).map((symbol) => [
+          tokenSymbols(chain).map((symbol) => [
             symbol,
             chainDeployments[symbol]?.address.toString(),
           ]),

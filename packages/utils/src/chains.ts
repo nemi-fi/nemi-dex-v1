@@ -36,6 +36,24 @@ function defineAvmChain<
 
 const aztecscanName = "Aztecscan";
 export const chains = {
+  mainnet: defineAvmChain({
+    id: 4218372384, // uint32(bytes4(keccak256('aztec-mainnet-v6')))
+    name: "Aztec Tierra",
+    rpcUrls: {
+      default: {
+        http: [
+          "https://lb.drpc.live/aztec-mainnet/AhzA6k_e8kYDnLbUfrHiY5FQah5evrwR8breLtu1AWF8",
+        ],
+      },
+    },
+    blockExplorers: {
+      default: {
+        name: aztecscanName,
+        url: "https://aztecscan.xyz",
+      },
+    },
+  }),
+
   testnet: defineAvmChain({
     id: 1276970776, // uint32(bytes4(keccak256('aztec-testnet-v6')))
     name: "Aztec Testnet",

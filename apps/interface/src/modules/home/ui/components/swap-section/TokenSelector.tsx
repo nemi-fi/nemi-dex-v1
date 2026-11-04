@@ -9,7 +9,7 @@ import { SearchInput } from "#/components/ui/search-input.js";
 import { useAccount } from "#/hooks/use-account.js";
 import type { TokenSide } from "#/hooks/use-token-selector-modal.js";
 import { formatUsd } from "#/lib/format.js";
-import { calculateUsdValue, TOKEN_PRICES } from "#/lib/prices.js";
+import { getUsdPrice, useUsdValue } from "#/lib/prices.js";
 import { useBalances } from "#/lib/queries.js";
 import { cn } from "#/lib/utils.js";
 import { sutils } from "@nemi-fi/utils";
@@ -32,7 +32,8 @@ const TokenItem = ({
 }) => {
   const account = useAccount();
   const hasBalance = Boolean(balance?.greaterThan(0));
-  const tokenPrice = TOKEN_PRICES[token.symbol] || token.usdPrice || 0;
+  const { prices, calculateUsdValue } = useUsdValue();
+  const tokenPrice = getUsdPrice(prices, token.symbol);
 
   return (
     <button
@@ -63,6 +64,9 @@ const TokenItem = ({
       <div className="flex flex-col items-end text-right">
         {account && (
           <div className="flex items-center gap-1 text-sm font-medium text-gray-900 md:text-base dark:text-gray-100">
+            <span className="text-xs font-normal text-gray-400 dark:text-gray-500">
+              Private:
+            </span>
             <span>{balance ? sutils.formatCurrencyAmount(balance) : "0"}</span>
             <span className="text-xs text-gray-500 dark:text-gray-400">
               {token.symbol}

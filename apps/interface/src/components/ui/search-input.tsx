@@ -1,6 +1,6 @@
 import { Input } from "#/components/ui/input.js";
 import { cn } from "#/lib/utils.js";
-import { Search, X } from "lucide-react";
+import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 import type * as React from "react";
 
 /** Text input with a leading search icon and, when `onClear` is given, a clear button. */
@@ -11,7 +11,7 @@ export function SearchInput({
 }: React.ComponentProps<"input"> & { onClear?: () => void }) {
   return (
     <div className="relative">
-      <Search
+      <MagnifyingGlassIcon
         className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
         aria-hidden="true"
       />
@@ -30,7 +30,7 @@ export function SearchInput({
           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           aria-label="Clear search"
         >
-          <X className="h-4 w-4" />
+          <XIcon className="h-4 w-4" />
         </button>
       )}
     </div>

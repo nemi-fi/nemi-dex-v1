@@ -5,9 +5,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "#/components/Logo.js";
 import { Button } from "#/components/ui/button.js";
-import { ArrowLeft, Puzzle } from "lucide-react";
-import { HomeNavbar } from "#/modules/home/ui/components/home-navar/index.js";
-import { HomeFooter } from "#/modules/home/ui/components/home-footer/index.js";
+import { ArrowLeftIcon, PuzzlePieceIcon } from "@phosphor-icons/react";
 
 export default function NotFound() {
   const [hover, setHover] = useState(false);
@@ -51,9 +49,7 @@ export default function NotFound() {
 
   return (
     <>
-      <HomeNavbar />
-
-      <div className="relative flex w-full flex-col items-center justify-center overflow-hidden px-4 py-16 text-foreground md:px-8">
+      <div className="relative flex w-full flex-1 flex-col items-center justify-center overflow-hidden px-4 py-16 text-foreground md:px-8">
         {/* Puzzle piece background layer */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <AnimatePresence>
@@ -108,7 +104,10 @@ export default function NotFound() {
                     width: `${piece.size * 4}px`,
                   }}
                 >
-                  <Puzzle className="text-primary/30" size={piece.size * 1.5} />
+                  <PuzzlePieceIcon
+                    className="text-primary/30"
+                    size={piece.size * 1.5}
+                  />
                 </div>
               </motion.div>
             ))}
@@ -201,7 +200,7 @@ export default function NotFound() {
                   whileHover={{ x: -3 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <ArrowLeft className="size-5" />
+                  <ArrowLeftIcon className="size-5" />
                   <span>Back to home</span>
                 </motion.span>
 
@@ -222,7 +221,6 @@ export default function NotFound() {
           </motion.div>
         </div>
       </div>
-      <HomeFooter />
     </>
   );
 }

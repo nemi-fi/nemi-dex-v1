@@ -1,6 +1,7 @@
 "use client";
 
 import { BalanceRow } from "#/components/TokenBalanceDisplay.js";
+import { UsdValueDisplay } from "#/components/UsdValueDisplay.js";
 import {
   AmountField,
   AmountFieldSkeleton,
@@ -20,7 +21,7 @@ import { TokenSelector } from "#/modules/home/ui/components/swap-section/TokenSe
 import { useTokenContext } from "#/modules/home/ui/components/swap-section/TokenContext.js";
 import WalletConnect from "#/modules/home/ui/components/wallet-connect/index.js";
 import { sutils } from "@nemi-fi/utils";
-import { ArrowDown, Plus } from "lucide-react";
+import { ArrowDownIcon, PlusIcon } from "@phosphor-icons/react";
 import { useRef } from "react";
 import { PoolFormLayout } from "../PoolFormLayout.js";
 import {
@@ -143,7 +144,7 @@ const RemoveLiquidityForm = ({
         </div>
       )}
 
-      <FieldDivider icon={<ArrowDown className="h-[18px] w-[18px]" />} />
+      <FieldDivider icon={<ArrowDownIcon className="h-[18px] w-[18px]" />} />
 
       <div className="mb-2">
         <FieldLabel>You receive</FieldLabel>
@@ -152,7 +153,7 @@ const RemoveLiquidityForm = ({
       {outputs.map(({ side, token, amount, label }, index) => (
         <div key={side}>
           {index > 0 && (
-            <FieldDivider icon={<Plus className="h-[18px] w-[18px]" />} />
+            <FieldDivider icon={<PlusIcon className="h-[18px] w-[18px]" />} />
           )}
           {isFormLoading ? (
             <AmountFieldSkeleton />
@@ -175,6 +176,7 @@ const RemoveLiquidityForm = ({
               />
             </AmountField>
           )}
+          {!isFormLoading && <UsdValueDisplay amount={amount} />}
         </div>
       ))}
 

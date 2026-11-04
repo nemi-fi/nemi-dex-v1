@@ -35,6 +35,13 @@
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
     Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   --font-mono: "Geist Mono Variable", monospace;
+  /* Puzzle-piece colours from the Nemi brand kit */
+  --color-nemi-blue: #4382bd;
+  --color-nemi-green: #2a6235;
+  --color-nemi-orange: #e9661e;
+  --color-nemi-pink: #ea789c;
+  --color-nemi-yellow: #f5bd28;
+  --color-nemi-cream: #f1eadf;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -568,5 +575,139 @@
     margin: 0;
     padding: 0;
     border: 0;
+  }
+}
+
+/* Landing: the dino's idle loops (one-shot moves are played from animated-dino.tsx) */
+@theme {
+  --animate-dino-breathe: dino-breathe 3.4s ease-in-out infinite;
+  --animate-goggle-glint: goggle-glint 6.5s cubic-bezier(0.45, 0, 0.2, 1) 1.5s
+    infinite both;
+  --animate-dino-look: dino-look 9s ease-in-out 2s infinite;
+  --animate-dino-tail: dino-tail 3.4s ease-in-out infinite;
+  --animate-dino-blink: dino-blink 6.2s linear 0.8s infinite both;
+  --animate-dino-peek: dino-peek 4.2s ease-in-out 1.4s infinite;
+  --animate-redact-bar: redact-bar 2.6s ease-in-out 0.6s both;
+  --animate-redact-text: redact-text 2.6s ease-in-out 0.6s both;
+
+  @keyframes dino-breathe {
+    0%,
+    100% {
+      transform: scale(1, 1);
+    }
+    50% {
+      transform: scale(0.99, 1.025);
+    }
+  }
+
+  /* Every few seconds the dino turns its head left, then right, as if checking who is watching */
+  @keyframes dino-look {
+    0%,
+    68%,
+    100% {
+      transform: none;
+    }
+    73%,
+    80% {
+      transform: rotate(-4deg);
+    }
+    85%,
+    92% {
+      transform: rotate(3deg);
+    }
+  }
+
+  /* The tail sways slowly around its root while idle... */
+  @keyframes dino-tail {
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    50% {
+      transform: rotate(3.5deg);
+    }
+  }
+
+  /* Lids close over the goggle lenses for a moment */
+  /* Eyelids drop behind the goggle glass and lift again: a single blink, then later a double one */
+  @keyframes dino-blink {
+    0%,
+    30%,
+    34.6%,
+    84%,
+    87.4%,
+    88.6%,
+    92%,
+    100% {
+      transform: translateY(-104%);
+      animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.45);
+    }
+    32.2%,
+    32.6%,
+    85.6%,
+    90.2% {
+      transform: translateY(0);
+      animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+    }
+  }
+
+  /* While hidden behind the waitlist card, it peeks over the edge now and then */
+  @keyframes dino-peek {
+    0%,
+    50%,
+    100% {
+      transform: none;
+    }
+    60%,
+    78% {
+      transform: translateY(-50%);
+    }
+    84% {
+      transform: translateY(-46%) rotate(-3deg);
+    }
+  }
+
+  /* Hero: a black bar wipes over "wallet" once, like a redaction, then settles into a soft highlight */
+  @keyframes redact-bar {
+    0% {
+      transform: scaleX(0);
+      background-color: var(--redact-ink);
+    }
+    25%,
+    65% {
+      transform: scaleX(1);
+      background-color: var(--redact-ink);
+    }
+    100% {
+      transform: scaleX(1);
+      background-color: var(--redact-soft);
+    }
+  }
+
+  @keyframes redact-text {
+    0%,
+    15% {
+      color: var(--redact-ink);
+    }
+    25%,
+    65% {
+      color: var(--redact-paper);
+    }
+    90%,
+    100% {
+      color: var(--redact-ink);
+    }
+  }
+
+  /* A soft shine sweeps across the goggle glass now and then */
+  @keyframes goggle-glint {
+    0%,
+    78% {
+      transform: translateX(-100%);
+    }
+    96%,
+    100% {
+      transform: translateX(100%);
+    }
   }
 }

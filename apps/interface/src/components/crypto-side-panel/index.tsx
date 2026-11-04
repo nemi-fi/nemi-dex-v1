@@ -14,7 +14,7 @@ import {
   TabsTrigger,
 } from "#/components/ui/tabs.js";
 import { Skeleton } from "#/components/ui/skeleton.js";
-import { Wallet } from "lucide-react";
+import { WalletIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { AssetList, AssetSkeleton } from "./components/AssetList.js";
 import { TransactionList } from "./components/TransactionList.js";
@@ -65,7 +65,7 @@ export function CryptoSidePanel({
       >
         <SheetHeader className="flex-shrink-0 border-b px-6 py-4">
           <SheetTitle className="flex items-center gap-2 text-xl">
-            <Wallet className="h-5 w-5" aria-hidden="true" />
+            <WalletIcon className="h-5 w-5" aria-hidden="true" />
             Account
           </SheetTitle>
         </SheetHeader>

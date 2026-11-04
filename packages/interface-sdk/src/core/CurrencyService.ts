@@ -1,6 +1,6 @@
 import type { ContractFunctionInteraction } from "@aztec-labs/aztec.js/contracts";
 import type { Fr } from "@aztec-labs/aztec.js/fields";
-import { tokenContract } from "@nemi-fi/contracts";
+import { tokenContract } from "../utils.js";
 import { sutils } from "@nemi-fi/utils";
 import { L2Token } from "@nemi-fi/v1-sdk";
 import { CurrencyAmount } from "@uniswap/sdk-core";
@@ -37,20 +37,20 @@ export class CurrencyService {
       await this.core.aztecNode(),
     );
     address = await sutils.resolveAztecAddress(address);
-    const { result: rawAmount } = await contract.methods
-      .balance_of_public(address)
-      .simulate({ from: address });
-    return sutils.bigIntToCurrencyAmount(token, rawAmount as bigint);
+    const rawAmount = (await this.core.simulatePublic(
+      contract.methods.balance_of_public(address),
+    )) as bigint;
+    return sutils.bigIntToCurrencyAmount(token, rawAmount);
   }
 
   async totalSupply(token: L2Token) {
     const randomAcc = await this.core.getReadonlyAccount();
-    const { result: rawAmount } = await (
-      await tokenContract(token, randomAcc, await this.core.aztecNode())
-    ).methods
-      .total_supply()
-      .simulate({ from: randomAcc.address });
-    return sutils.bigIntToCurrencyAmount(token, rawAmount as bigint);
+    const rawAmount = (await this.core.simulatePublic(
+      (
+        await tokenContract(token, randomAcc, await this.core.aztecNode())
+      ).methods.total_supply(),
+    )) as bigint;
+    return sutils.bigIntToCurrencyAmount(token, rawAmount);
   }
 
   async mintPrivate({

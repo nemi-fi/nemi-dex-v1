@@ -3,12 +3,17 @@ import { Button } from "#/components/ui/button.js";
 import { cn } from "#/lib/utils.js";
 import { TokenIcon } from "#/components/TokenIcon.js";
 import { formatCompact, formatUsd } from "#/lib/format.js";
-import { calculatePositionValue, calculateTvl } from "#/lib/prices.js";
+import { useUsdValue } from "#/lib/prices.js";
 import type { interfaceSdk } from "@nemi-fi/interface-sdk";
 import { sutils } from "@nemi-fi/utils";
 import type { Pool } from "@nemi-fi/v1-sdk";
 import type { Currency, CurrencyAmount } from "@uniswap/sdk-core";
-import { ChevronDown, ChevronUp, MinusCircle, PlusCircle } from "lucide-react";
+import {
+  CaretDownIcon,
+  CaretUpIcon,
+  MinusCircleIcon,
+  PlusCircleIcon,
+} from "@phosphor-icons/react";
 import { Link } from "react-router";
 import { useState } from "react";
 
@@ -36,7 +41,7 @@ export function PoolCard({ pool, position }: PoolCardProps) {
   const formatReserve = (amount: CurrencyAmount<Currency>) =>
     formatCompact(Number(amount.toExact()));
 
-  // Calculate TVL using the proper formula
+  const { calculateTvl, calculatePositionValue } = useUsdValue();
   const tvl = calculateTvl(pool.reserve0, pool.reserve1);
   return (
     <div className={cardClasses}>
@@ -119,9 +124,9 @@ export function PoolCard({ pool, position }: PoolCardProps) {
                     onClick={() => setPositionExpanded(!positionExpanded)}
                   >
                     {positionExpanded ? (
-                      <ChevronUp className="h-4 w-4" />
+                      <CaretUpIcon className="h-4 w-4" />
                     ) : (
-                      <ChevronDown className="h-4 w-4" />
+                      <CaretDownIcon className="h-4 w-4" />
                     )}
                   </Button>
                 </div>
@@ -174,7 +179,7 @@ export function PoolCard({ pool, position }: PoolCardProps) {
                 <Link
                   to={`/pool/add-liquidity?tokenA=${pool.token0.address}&tokenB=${pool.token1.address}`}
                 >
-                  <PlusCircle className="h-4 w-4" />
+                  <PlusCircleIcon className="h-4 w-4" />
                   Add
                 </Link>
               </Button>
@@ -186,7 +191,7 @@ export function PoolCard({ pool, position }: PoolCardProps) {
                 <Link
                   to={`/pool/remove-liquidity?tokenA=${pool.token0.address}&tokenB=${pool.token1.address}`}
                 >
-                  <MinusCircle className="h-4 w-4" />
+                  <MinusCircleIcon className="h-4 w-4" />
                   Remove
                 </Link>
               </Button>
@@ -200,7 +205,7 @@ export function PoolCard({ pool, position }: PoolCardProps) {
               <Link
                 to={`/pool/add-liquidity?tokenA=${pool.token0.address}&tokenB=${pool.token1.address}`}
               >
-                <PlusCircle className="h-4 w-4" />
+                <PlusCircleIcon className="h-4 w-4" />
                 Add Liquidity
               </Link>
             </Button>

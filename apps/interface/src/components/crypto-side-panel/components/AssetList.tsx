@@ -5,13 +5,12 @@ import { Label } from "#/components/ui/label.js";
 import { Skeleton } from "#/components/ui/skeleton.js";
 import { Switch } from "#/components/ui/switch.js";
 import { useAccount } from "#/hooks/use-account.js";
-import { useBalances } from "#/lib/queries.js";
+import { type TokenBalance, useWalletBalances } from "#/lib/queries.js";
 import { cn } from "#/lib/utils.js";
 import { formatUsd } from "#/lib/format.js";
-import { calculateUsdValue } from "#/lib/prices.js";
+import { useUsdValue } from "#/lib/prices.js";
 import { sutils } from "@nemi-fi/utils";
-import { L2Token } from "@nemi-fi/v1-sdk";
-import { CurrencyAmount } from "@uniswap/sdk-core";
+import { GlobeIcon, ShieldCheckIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
 // Get network color
@@ -38,9 +37,15 @@ function getNetworkColor(network: string): string {
 }
 
 // Asset item component
-function AssetItem({ balance }: { balance: CurrencyAmount<L2Token> }) {
-  const networkColor = getNetworkColor(balance.currency.symbol || "Unknown");
-  const usdValue = calculateUsdValue(balance);
+function AssetItem({
+  balance: { total, ...balance },
+}: {
+  balance: TokenBalance;
+}) {
+  const token = total.currency;
+  const networkColor = getNetworkColor(token.symbol || "Unknown");
+  const { calculateUsdValue } = useUsdValue();
+  const usdValue = calculateUsdValue(total);
 
   return (
     <div className="flex items-center justify-between py-4 px-4 border-b last:border-b-0 hover:bg-muted/50 dark:hover:bg-gray-800/50 transition-colors animate-in fade-in-0">
@@ -52,14 +57,21 @@ function AssetItem({ balance }: { balance: CurrencyAmount<L2Token> }) {
           )}
           aria-hidden="true"
         >
-          <TokenIcon token={balance.currency} size={20} />
+          <TokenIcon token={token} size={20} />
         </div>
         <div>
           <div className="font-medium text-base">
-            {balance.currency.name || "Unknown Token"}
+            {token.name || "Unknown Token"}
           </div>
           <div className="text-xs text-muted-foreground flex items-center gap-1">
-            <span>{sutils.displayCurrencyAmount(balance)}</span>
+            <ShieldCheckIcon className="h-3 w-3" aria-hidden="true" />
+            <span>
+              Private: {sutils.displayCurrencyAmount(balance.private)}
+            </span>
+          </div>
+          <div className="text-xs text-muted-foreground flex items-center gap-1">
+            <GlobeIcon className="h-3 w-3" aria-hidden="true" />
+            <span>Public: {sutils.displayCurrencyAmount(balance.public)}</span>
           </div>
         </div>
       </div>
@@ -114,19 +126,20 @@ function ControlsSkeleton() {
 export function AssetList() {
   const [searchQuery, setSearchQuery] = useState("");
   const account = useAccount();
-  const balances = useBalances(account);
+  const balances = useWalletBalances(account);
   const [hideZeroBalance, setHideZeroBalance] = useState(false);
 
   const filteredBalances = balances?.filter((x) => {
     if (!x.data) {
       return true;
     }
+    const { total } = x.data;
 
     const matchesSearch =
-      x.data.currency.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      x.data.currency.symbol?.toLowerCase().includes(searchQuery.toLowerCase());
+      total.currency.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      total.currency.symbol?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const hasBalance = !hideZeroBalance || x.data.greaterThan(0);
+    const hasBalance = !hideZeroBalance || total.greaterThan(0);
 
     return matchesSearch && hasBalance;
   });
@@ -191,7 +204,7 @@ export function AssetList() {
           <div>
             {filteredBalances?.map((balance, i) => (
               <Query
-                key={balance.data?.currency.address ?? i}
+                key={balance.data?.total.currency.address ?? i}
                 query={balance}
                 pending={() => <AssetSkeleton />}
               >

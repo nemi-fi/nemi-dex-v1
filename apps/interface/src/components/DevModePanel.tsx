@@ -2,36 +2,30 @@
 
 import { useIsMobile } from "#/hooks/use-mobile.js";
 import { Button } from "#/components/ui/button.js";
-import { Input } from "#/components/ui/input.js";
 import { useIsDevEnvironment } from "#/hooks/use-is-dev-environment.js";
 import { lib } from "#/lib/sdk.js";
 import { sutils } from "@nemi-fi/utils";
 import {
-  ArrowRight,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Coins,
-  Globe,
-  Landmark,
-  Minus,
-  Navigation,
-  Plus,
-  ShieldAlert,
-  Terminal,
-  Wrench,
-  X,
-} from "lucide-react";
+  ArrowRightIcon,
+  BankIcon,
+  CaretDownIcon,
+  CaretUpIcon,
+  CheckIcon,
+  GlobeIcon,
+  NavigationArrowIcon,
+  ShieldWarningIcon,
+  TerminalIcon,
+  WrenchIcon,
+  XIcon,
+} from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 // Define tab types
-type TabType = "session" | "tokens" | "admin" | "nav";
+type TabType = "session" | "admin" | "nav";
 
 export const DevModePanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [tokenAmount, setTokenAmount] = useState(1000);
-  const [customToken, setCustomToken] = useState("");
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<TabType>("session");
   const [currentChain, setCurrentChain] = useState<string>("");
@@ -46,20 +40,6 @@ export const DevModePanel = () => {
     }
   }, []);
 
-  // Simulate minting tokens
-  const mintTokens = (amount: number, symbol = "ETH") => {
-    console.log(`DEV: Minting ${amount} ${symbol}`);
-    // Implementation would depend on your backend/SDK
-  };
-
-  // Adjust token amount
-  const adjustAmount = (delta: number) => {
-    setTokenAmount((prev) => {
-      const newAmount = prev + delta;
-      return newAmount < 100 ? 100 : newAmount > 10000 ? 10000 : newAmount;
-    });
-  };
-
   // Switch network
   const switchNetwork = (chainName: keyof typeof sutils.supportedAvmChains) => {
     if (lib.aztec && lib.aztec.reconnect) {
@@ -73,10 +53,9 @@ export const DevModePanel = () => {
     label: string;
     icon: React.ReactNode;
   }> = [
-    { id: "session", label: "Session", icon: <ShieldAlert size={14} /> },
-    { id: "tokens", label: "Tokens", icon: <Coins size={14} /> },
-    { id: "admin", label: "Admin", icon: <Landmark size={14} /> },
-    { id: "nav", label: "Nav", icon: <Navigation size={14} /> },
+    { id: "session", label: "Session", icon: <ShieldWarningIcon size={14} /> },
+    { id: "admin", label: "Admin", icon: <BankIcon size={14} /> },
+    { id: "nav", label: "Nav", icon: <NavigationArrowIcon size={14} /> },
   ];
 
   if (!isVisible) return null;
@@ -92,7 +71,7 @@ export const DevModePanel = () => {
           }`}
           aria-label="Open Developer Panel"
         >
-          <Terminal size={isMobile ? 24 : 20} />
+          <TerminalIcon size={isMobile ? 24 : 20} />
         </button>
       )}
 
@@ -112,7 +91,7 @@ export const DevModePanel = () => {
           {/* Header */}
           <div className="bg-yellow-500 text-black px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Wrench size={isMobile ? 18 : 16} />
+              <WrenchIcon size={isMobile ? 18 : 16} />
               <span className="font-medium">DEV PANEL</span>
             </div>
             <div className="flex items-center gap-2">
@@ -122,9 +101,9 @@ export const DevModePanel = () => {
                 aria-label={isMinimized ? "Expand" : "Minimize"}
               >
                 {isMinimized ? (
-                  <ChevronUp size={isMobile ? 20 : 16} />
+                  <CaretUpIcon size={isMobile ? 20 : 16} />
                 ) : (
-                  <ChevronDown size={isMobile ? 20 : 16} />
+                  <CaretDownIcon size={isMobile ? 20 : 16} />
                 )}
               </button>
               <button
@@ -132,7 +111,7 @@ export const DevModePanel = () => {
                 className="p-1.5 hover:bg-yellow-600 rounded-md transition-colors"
                 aria-label="Close"
               >
-                <X size={isMobile ? 20 : 16} />
+                <XIcon size={isMobile ? 20 : 16} />
               </button>
             </div>
           </div>
@@ -165,88 +144,18 @@ export const DevModePanel = () => {
                 style={{ maxHeight: isMobile ? "calc(80vh - 120px)" : "75vh" }}
               >
                 <div className="space-y-5">
-                  {/* Token minting - always visible on desktop, only when tab is active on mobile */}
-                  {(!isMobile || activeTab === "tokens") && (
-                    <div className="space-y-3">
-                      <h3 className="text-xs uppercase font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Coins size={14} />
-                        Mint Test Tokens
-                      </h3>
-                      <div className="bg-card rounded-md p-4 border space-y-5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Amount:</span>
-                          <div className="flex items-center gap-3">
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              className="h-10 w-10 rounded-full p-0"
-                              onClick={() => adjustAmount(-100)}
-                            >
-                              <Minus size={isMobile ? 16 : 12} />
-                            </Button>
-                            <span className="text-base font-medium w-20 text-center">
-                              {tokenAmount}
-                            </span>
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              className="h-10 w-10 rounded-full p-0"
-                              onClick={() => adjustAmount(100)}
-                            >
-                              <Plus size={isMobile ? 16 : 12} />
-                            </Button>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <Button
-                            size={isMobile ? "default" : "sm"}
-                            onClick={() => mintTokens(tokenAmount, "ETH")}
-                            className="bg-blue-600 hover:bg-blue-700 text-white py-6"
-                          >
-                            Mint ETH
-                          </Button>
-                          <Button
-                            size={isMobile ? "default" : "sm"}
-                            onClick={() => mintTokens(tokenAmount, "USDC")}
-                            className="bg-green-600 hover:bg-green-700 text-white py-6"
-                          >
-                            Mint USDC
-                          </Button>
-                        </div>
-
-                        <div className="flex gap-2 flex-col sm:flex-row">
-                          <Input
-                            placeholder="Custom token (e.g., DAI)"
-                            value={customToken}
-                            onChange={(e) => setCustomToken(e.target.value)}
-                            className="text-sm h-12 sm:h-9 flex-1"
-                          />
-                          <Button
-                            size={isMobile ? "default" : "sm"}
-                            onClick={() => mintTokens(tokenAmount, customToken)}
-                            disabled={!customToken}
-                            className="h-12 sm:h-9"
-                          >
-                            Mint
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Admin Section - always visible on desktop, only when tab is active on mobile */}
                   {(!isMobile || activeTab === "admin") && (
                     <div className="space-y-3">
                       <h3 className="text-xs uppercase font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Landmark size={14} />
+                        <BankIcon size={14} />
                         Admin Controls
                       </h3>
 
                       {/* Network Selection */}
                       <div className="bg-card rounded-md p-4 border space-y-3">
                         <h4 className="text-xs font-medium flex items-center gap-1.5 pb-1 border-b border-muted">
-                          <Globe size={14} />
+                          <GlobeIcon size={14} />
                           Network Selection
                         </h4>
 
@@ -279,7 +188,10 @@ export const DevModePanel = () => {
                                   </span>
                                 </div>
                                 {currentChain === chain.name && (
-                                  <Check size={16} className="text-primary" />
+                                  <CheckIcon
+                                    size={16}
+                                    className="text-primary"
+                                  />
                                 )}
                               </button>
                             ),
@@ -298,7 +210,7 @@ export const DevModePanel = () => {
                       {/* Admin Navigation */}
                       <div className="bg-card rounded-md p-4 border space-y-3">
                         <h4 className="text-xs font-medium flex items-center gap-1.5 pb-1 border-b border-muted">
-                          <Landmark size={14} />
+                          <BankIcon size={14} />
                           Admin Pages
                         </h4>
                         <Button
@@ -306,7 +218,7 @@ export const DevModePanel = () => {
                           className="w-full justify-start h-12 text-base"
                           onClick={() => (window.location.href = "/admin/init")}
                         >
-                          <ArrowRight className="w-4 h-4 mr-2" />
+                          <ArrowRightIcon className="w-4 h-4 mr-2" />
                           Admin Initialization
                         </Button>
                       </div>
@@ -317,7 +229,7 @@ export const DevModePanel = () => {
                   {(!isMobile || activeTab === "nav") && (
                     <div className="space-y-3">
                       <h3 className="text-xs uppercase font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Navigation size={14} />
+                        <NavigationArrowIcon size={14} />
                         Quick Navigation
                       </h3>
                       <div className="bg-card rounded-md p-4 border space-y-3">
@@ -326,7 +238,7 @@ export const DevModePanel = () => {
                           className="w-full justify-start h-12 text-base"
                           onClick={() => (window.location.href = "/swap")}
                         >
-                          <ArrowRight className="w-4 h-4 mr-2" />
+                          <ArrowRightIcon className="w-4 h-4 mr-2" />
                           Swap
                         </Button>
                         <Button
@@ -334,7 +246,7 @@ export const DevModePanel = () => {
                           className="w-full justify-start h-12 text-base"
                           onClick={() => (window.location.href = "/pool")}
                         >
-                          <ArrowRight className="w-4 h-4 mr-2" />
+                          <ArrowRightIcon className="w-4 h-4 mr-2" />
                           Pool
                         </Button>
                         <Button
@@ -342,7 +254,7 @@ export const DevModePanel = () => {
                           className="w-full justify-start h-12 text-base"
                           onClick={() => (window.location.href = "/")}
                         >
-                          <ArrowRight className="w-4 h-4 mr-2" />
+                          <ArrowRightIcon className="w-4 h-4 mr-2" />
                           Home
                         </Button>
                       </div>

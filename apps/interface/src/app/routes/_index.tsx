@@ -1,27 +1,73 @@
 "use client";
 
-import { HomeNavbar } from "#/modules/home/ui/components/home-navar/index.js";
-import { TokenProvider } from "#/modules/home/ui/components/swap-section/TokenContext.js";
-import styles from "#/styles/SwapOverlay.module.css";
-import Image from "#/components/Image.js";
+import type { NavbarHandle } from "#/modules/home/ui/components/home-navar/index.js";
+import { SWAPS_OPEN } from "#/modules/landing/launch-state.js";
+import { WaitlistNavButton } from "#/modules/landing/ui/cta-links.js";
 import HeroSection from "#/modules/landing/ui/hero-section.js";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 
-// Sections below the fold are split into their own chunks
-const FeatureCards = lazy(
-  () => import("#/modules/landing/ui/feature-cards-alt.js"),
+/** The landing's sections, listed in the mobile menu. */
+const PAGE_LINKS = [
+  { name: "What anyone can see", href: "#visibility-heading" },
+  { name: "Why the wallet matters", href: "#wallet-diagram-heading" },
+  { name: "How a swap works", href: "#how-it-works-heading" },
+  { name: "Questions", href: "#faq-heading" },
+] as const;
+
+/** Shown in the browser tab while the visitor is looking at another tab. */
+const AWAY_TITLE = "Nobody's watching.";
+
+/**
+ * Small jokes on the theme of the page: the tab title changes while you are away, and a note
+ * waits in the console for anyone digging for wallets.
+ */
+function useLandingEasterEggs(): void {
+  useEffect(() => {
+    const title = document.title;
+    const onVisibility = (): void => {
+      document.title = document.hidden ? AWAY_TITLE : title;
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    console.log(
+      "%cLooking for someone's wallet? It isn't in here either.",
+      "font: bold 14px system-ui; background: #000; color: #fff; padding: 4px 8px; border-radius: 4px",
+    );
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      document.title = title;
+    };
+  }, []);
+}
+
+// The landing sections are imported directly, not lazily: lazy sections never finished rendering
+// on the server, so crawlers (which wait for the whole page) got no HTML for them.
+import ClosingCta from "#/modules/landing/ui/closing-cta.js";
+import Faq from "#/modules/landing/ui/faq.js";
+import HowItWorks from "#/modules/landing/ui/how-it-works.js";
+import VisibilityTable from "#/modules/landing/ui/visibility-table.js";
+import WalletDiagram from "#/modules/landing/ui/wallet-diagram.js";
+import { LandingSchema } from "#/modules/landing/ui/landing-schema.js";
+import type { Route } from "./+types/_index.js";
+
+// The root layout's navbar: the waitlist button until swaps open, and the sections in the mobile menu
+export const handle: NavbarHandle = {
+  navbar: {
+    action: SWAPS_OPEN ? undefined : <WaitlistNavButton />,
+    pageLinks: PAGE_LINKS,
+  },
+};
+
+export const links: Route.LinksFunction = () => [
+  { rel: "canonical", href: "https://nemi.fi/" },
+];
+
+// The swap form and its token context are heavy and only shown once swaps are open, so they stay in
+// their own chunks
+const TokenProvider = lazy(() =>
+  import("#/modules/home/ui/components/swap-section/TokenContext.js").then(
+    (mod) => ({ default: mod.TokenProvider }),
+  ),
 );
-const FeatureCardsMobile = lazy(
-  () => import("#/modules/landing/ui/feature-cards-mobile.js"),
-);
-const DefiPuzzle = lazy(() => import("#/modules/landing/ui/defi-puzzle.js"));
-const BenefitsForTraders = lazy(
-  () => import("#/modules/landing/ui/benefits-for-traders.js"),
-);
-const FeaturedByAztec = lazy(
-  () => import("#/modules/landing/ui/featured-by-aztec.js"),
-);
-const Footer = lazy(() => import("#/modules/landing/ui/footer.js"));
 const SwapSection = lazy(() =>
   import("#/modules/home/ui/components/swap-section/index.js").then((mod) => ({
     default: mod.SwapSection,
@@ -29,45 +75,6 @@ const SwapSection = lazy(() =>
 );
 
 // Skeleton loaders
-const FeatureCardsSkeleton = () => (
-  <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-12">
-    <div className="animate-pulse">
-      <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/3 mx-auto mb-10"></div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="bg-gray-100 dark:bg-gray-800 rounded-xl p-6">
-            <div className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4"></div>
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-2/3 mb-3"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
-
-const BenefitsSkeleton = () => (
-  <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16">
-    <div className="animate-pulse">
-      <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/2 mx-auto mb-10"></div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="flex gap-4 mb-6">
-            <div className="h-12 w-12 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0"></div>
-            <div className="flex-1">
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-3"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
-
 const SwapSkeleton = () => (
   <div className="w-full max-w-md mx-auto">
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 animate-pulse">
@@ -103,241 +110,57 @@ const SwapSkeleton = () => (
   </div>
 );
 
-const FooterSkeleton = () => (
-  <div className="w-full bg-gray-50 dark:bg-gray-900 py-12">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 animate-pulse">
-      <div className="flex flex-col md:flex-row justify-between">
-        <div className="mb-8 md:mb-0">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-4"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-2"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-40"></div>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-          {[...Array(3)].map((_, i) => (
-            <div key={i}>
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-4"></div>
-              {[...Array(4)].map((_, j) => (
-                <div
-                  key={j}
-                  className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-3"
-                ></div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="h-px bg-gray-200 dark:bg-gray-700 my-8"></div>
-      <div className="flex justify-between items-center">
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-40"></div>
-        <div className="flex space-x-4">
-          {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-full"
-            ></div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-// Generic skeleton for other components
-const GenericSkeleton = () => (
-  <div className="w-full py-12">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 animate-pulse">
-      <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mx-auto mb-8"></div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[...Array(2)].map((_, i) => (
-          <div
-            key={i}
-            className="h-40 bg-gray-200 dark:bg-gray-700 rounded-lg"
-          ></div>
-        ))}
-      </div>
-      <div className="mt-8 h-40 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-    </div>
-  </div>
-);
-
 export default function LandingInfo() {
+  useLandingEasterEggs();
   return (
-    <div className="flex flex-col min-h-screen dark:bg-black">
-      <header role="banner">
-        <HomeNavbar />
-      </header>
+    // Selected text turns into a black redaction bar, like the hidden wallet
+    <div className="flex flex-1 flex-col dark:bg-black selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
       <main
         className="min-h-screen bg-white dark:bg-black relative overflow-hidden"
         id="main-content"
       >
-        {/* Background dots pattern - only for sections after the first one */}
-        <div className="absolute inset-0 z-0 top-[700px]">
-          <div
-            className="w-full h-full opacity-20 dark:opacity-10"
-            style={{
-              backgroundImage: "radial-gradient(#000 1px, transparent 1px)",
-              backgroundSize: "30px 30px",
-            }}
-            aria-hidden="true"
-          ></div>
-        </div>
-
-        <div className="relative">
-          {/* Hero Section */}
+        <LandingSchema />
+        {/* The page is one article: the hero is its header (with the h1), each block below a section with an h2 */}
+        <article>
           <HeroSection />
 
-          {/* DeFi Puzzle Section */}
-          <section aria-labelledby="defi-puzzle-heading">
-            <Suspense fallback={<GenericSkeleton />}>
-              <DefiPuzzle />
-            </Suspense>
-          </section>
+          <VisibilityTable />
+          <WalletDiagram />
+          <HowItWorks />
 
-          {/* Feature Cards Section - Desktop */}
-          <section
-            aria-labelledby="features-heading"
-            className="hidden md:block"
-          >
-            <Suspense fallback={<FeatureCardsSkeleton />}>
-              <FeatureCards />
-            </Suspense>
-          </section>
-
-          {/* Feature Cards Section - Mobile */}
-          <section aria-label="Features" className="md:hidden">
-            <Suspense fallback={<FeatureCardsSkeleton />}>
-              <FeatureCardsMobile />
-            </Suspense>
-          </section>
-
-          <div className="relative">
-            {/* Puzzle pieces background */}
-            <div
-              className="absolute inset-0 w-full h-full overflow-hidden"
-              aria-hidden="true"
-            >
-              <div className={styles.node_one}>
-                <Image
-                  src="/images/puzzle/blue.svg"
-                  width={220}
-                  height={220}
-                  alt=""
-                  priority={false}
-                  quality={75}
-                  loading="lazy"
-                  role="presentation"
-                />
-              </div>
-
-              <div className={styles.node_two}>
-                <Image
-                  src="/images/puzzle/green.svg"
-                  width={220}
-                  height={220}
-                  alt=""
-                  priority={false}
-                  quality={75}
-                  loading="lazy"
-                  role="presentation"
-                />
-              </div>
-
-              <div className={styles.node_three}>
-                <Image
-                  src="/images/puzzle/green1.svg"
-                  width={220}
-                  height={220}
-                  alt=""
-                  quality={75}
-                  loading="lazy"
-                  role="presentation"
-                />
-              </div>
-
-              <div className={styles.node_four}>
-                <Image
-                  src="/images/puzzle/orange.svg"
-                  width={320}
-                  height={320}
-                  alt=""
-                  quality={75}
-                  loading="lazy"
-                  role="presentation"
-                />
-              </div>
-
-              <div className={styles.node_five}>
-                <Image
-                  src="/images/puzzle/pink.svg"
-                  width={220}
-                  height={220}
-                  alt=""
-                  quality={75}
-                  loading="lazy"
-                  role="presentation"
-                />
-              </div>
-
-              <div className={styles.node_six}>
-                <Image
-                  src="/images/puzzle/yellow.svg"
-                  width={220}
-                  height={220}
-                  alt=""
-                  quality={75}
-                  loading="lazy"
-                  role="presentation"
-                />
-              </div>
-
-              <div className={styles.node_seven}>
-                <Image
-                  src="/images/puzzle/yellow1.svg"
-                  width={140}
-                  height={140}
-                  alt=""
-                  quality={75}
-                  loading="lazy"
-                  role="presentation"
-                />
-              </div>
-            </div>
-
+          {/* The live form only makes sense once swaps work; before that the waitlist is the action */}
+          {SWAPS_OPEN && (
             <section
               aria-labelledby="swap-demo-heading"
-              className="w-full max-w-xl mx-auto relative overflow-hidden py-20"
+              className="w-full px-4 py-14 text-black sm:px-6 md:py-24 dark:text-white"
             >
-              <h2 id="swap-demo-heading" className="sr-only">
-                Try Nemi Swap
-              </h2>
-
-              <div className="relative z-20">
-                <TokenProvider>
+              <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-[1fr_2fr] md:gap-16">
+                <div>
+                  <h2
+                    id="swap-demo-heading"
+                    className="text-4xl leading-tight font-bold tracking-[-1px] md:text-5xl"
+                  >
+                    Try it here
+                  </h2>
+                  <p className="mt-4 leading-relaxed text-black/65 dark:text-white/65">
+                    The same swap form as in the app. Connect a wallet to swap.
+                  </p>
+                </div>
+                <div className="relative z-20 min-w-0">
                   <Suspense fallback={<SwapSkeleton />}>
-                    <SwapSection />
+                    <TokenProvider>
+                      <SwapSection />
+                    </TokenProvider>
                   </Suspense>
-                </TokenProvider>
+                </div>
               </div>
             </section>
-          </div>
+          )}
 
-          {/* Benefits for Traders Section */}
-          <section aria-labelledby="benefits-heading">
-            <Suspense fallback={<BenefitsSkeleton />}>
-              <BenefitsForTraders />
-            </Suspense>
-          </section>
-
-          <section aria-labelledby="featured-heading">
-            <Suspense fallback={<GenericSkeleton />}>
-              <FeaturedByAztec />
-            </Suspense>
-          </section>
-        </div>
+          <Faq />
+          <ClosingCta />
+        </article>
       </main>
-      <Suspense fallback={<FooterSkeleton />}>
-        <Footer />
-      </Suspense>
     </div>
   );
 }

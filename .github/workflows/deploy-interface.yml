@@ -52,7 +52,7 @@ jobs:
             fi
             pnpm turbo bootstrap
             # cf prints the deployment result as JSON to stdout
-            npx cf previews deploy $preview_name | tee "$RUNNER_TEMP/preview.json"
+            VITE_AZTEC_CHAIN=testnet npx cf previews deploy $preview_name | tee "$RUNNER_TEMP/preview.json"
             url=$(jq -r '.preview_urls[0] // .deployment_urls[0] // empty' "$RUNNER_TEMP/preview.json")
             echo "url=$url" >> "$GITHUB_OUTPUT"
           fi
@@ -66,5 +66,4 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state=success \
             -f context="Interface deployment" \
-            -f description="$URL" \
             -f target_url="$URL"

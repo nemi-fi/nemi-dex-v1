@@ -1,7 +1,9 @@
 "use client";
 
+import { ExperimentalDisclaimer } from "#/components/ExperimentalDisclaimer.js";
 import { TokenBalanceDisplay } from "#/components/TokenBalanceDisplay.js";
 import { TransactionDetailRow, TxModal } from "#/components/TxModal.js";
+import { UsdValueDisplay } from "#/components/UsdValueDisplay.js";
 import { FieldDivider, FieldLabel } from "#/components/ui/amount-field.js";
 import { Button } from "#/components/ui/button.js";
 import { useAccount } from "#/hooks/use-account.js";
@@ -10,51 +12,27 @@ import {
   isPositiveAmount,
   safeParseCurrencyAmount,
 } from "#/lib/amount-input.js";
-import { formatUsd } from "#/lib/format.js";
 import { modals } from "#/lib/modal.js";
-import { calculateUsdValue } from "#/lib/prices.js";
 import { useBalance } from "#/lib/queries.js";
 import { lib } from "#/lib/sdk.js";
 import WalletConnect from "#/modules/home/ui/components/wallet-connect/index.js";
+import { interfaceSdk } from "@nemi-fi/interface-sdk";
 import { sutils } from "@nemi-fi/utils";
-import type { L2Token } from "@nemi-fi/v1-sdk";
-import type { CurrencyAmount } from "@uniswap/sdk-core";
 import {
-  ArrowDown,
-  ArrowRightLeft,
-  ArrowUp,
-  Loader2,
-  Lock,
-  ShieldCheck,
-} from "lucide-react";
+  ArrowDownIcon,
+  ArrowUpIcon,
+  ArrowsLeftRightIcon,
+  CircleNotchIcon,
+  LockIcon,
+  PercentIcon,
+  ShieldCheckIcon,
+  WarningIcon,
+} from "@phosphor-icons/react";
 import { SwapProvider, useSwapContext } from "./SwapContext.js";
 import { SwapStats } from "./SwapStats.js";
 import { useTokenContext } from "./TokenContext.js";
 import { TokenInput } from "./TokenInput.js";
 import { TokenSelector } from "./TokenSelector.js";
-
-/**
- * @deprecated nuke this component
- */
-const UsdValueDisplay = ({
-  amount,
-}: {
-  amount: CurrencyAmount<L2Token> | undefined;
-}) => {
-  const value = amount ? calculateUsdValue(amount) : undefined;
-
-  if (!value) {
-    return null;
-  }
-  return (
-    <div
-      className="mt-1.5 px-1 text-sm text-gray-500 dark:text-gray-400"
-      aria-live="polite"
-    >
-      = {formatUsd(value)} USD
-    </div>
-  );
-};
 
 const SwapForm = () => {
   // Get token context for token selection
@@ -70,6 +48,7 @@ const SwapForm = () => {
     closeTokenModal,
     handleSwitchTokens,
     quote,
+    quoteError,
     isCalculating,
     setPayValue,
     resetSwapForm,
@@ -95,33 +74,41 @@ const SwapForm = () => {
 
     // Store the modal reference so we can close it later
     modals.show(TxModal, {
+      publicData: [
+        {
+          label: "Amount in",
+          value: sutils.displayCurrencyAmount(quote.amountIn),
+        },
+        {
+          label: "Amount out",
+          value: `~${sutils.displayCurrencyAmount(quote.amountOut)}`,
+        },
+      ],
       details: (
         <>
           <TransactionDetailRow
-            icon={<ArrowUp className="h-4 w-4" />}
+            icon={<ArrowUpIcon className="h-4 w-4" />}
             label="You pay"
             value={sutils.displayCurrencyAmount(quote.amountIn)}
           />
           <TransactionDetailRow
-            icon={<ArrowDown className="h-4 w-4" />}
+            icon={<ArrowDownIcon className="h-4 w-4" />}
             label="You receive"
             value={`~${sutils.displayCurrencyAmount(quote.amountOut)}`}
           />
           <TransactionDetailRow
-            icon={<ArrowRightLeft className="h-4 w-4" />}
+            icon={<ArrowsLeftRightIcon className="h-4 w-4" />}
             label="Exchange Rate"
             value={sutils.displayPrice(quote.executionPrice)}
             bgClass="bg-blue-50 dark:bg-blue-900/20"
           />
-          {/* TODO */}
-          {/* <TransactionDetailRow
-            icon={<Percent className="h-4 w-4" />}
+          <TransactionDetailRow
+            icon={<PercentIcon className="h-4 w-4" />}
             label="Slippage Tolerance"
-            value={slippageTolerance}
-            colorClass="text-amber-500"
+            value={sutils.displayPercent(interfaceSdk.SLIPPAGE_TOLERANCE)}
             bgClass="bg-amber-50 dark:bg-amber-900/20"
             valueExtraClass="bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded"
-          /> */}
+          />
         </>
       ),
       async sendTx() {
@@ -146,7 +133,7 @@ const SwapForm = () => {
     <div className="relative">
       <div className="mb-3 flex items-center">
         <div className="flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
-          <ShieldCheck className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+          <ShieldCheckIcon className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
           <span className="text-xs font-medium">Private Swap</span>
           <span className="ml-1.5 rounded bg-white/80 px-1 py-0.5 text-[10px] dark:bg-black/20">
             Shielded by zero-knowledge proofs
@@ -155,6 +142,8 @@ const SwapForm = () => {
       </div>
 
       <div className="vibe-card px-6 py-5">
+        <ExperimentalDisclaimer />
+
         {/* From token input */}
         <div className="mb-2 flex items-center justify-between gap-2">
           <FieldLabel>You pay</FieldLabel>
@@ -202,6 +191,23 @@ const SwapForm = () => {
           </div>
         )}
 
+        {/* No liquidity / no quote message */}
+        {account &&
+          quoteError &&
+          !isCalculating &&
+          isPositiveAmount(payValue) && (
+            <div
+              role="alert"
+              className="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800/40 dark:bg-red-900/20 dark:text-red-300"
+            >
+              <WarningIcon
+                className="mt-0.5 h-4 w-4 shrink-0"
+                aria-hidden="true"
+              />
+              <p>{quoteError}</p>
+            </div>
+          )}
+
         {/* Action button */}
         <div className="mt-5" id="swap-section-btn">
           {!account ? (
@@ -228,7 +234,7 @@ const SwapForm = () => {
               disabled
               aria-label="Calculating swap, please wait"
             >
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              <CircleNotchIcon className="mr-2 h-5 w-5 animate-spin" />
               Calculating...
             </Button>
           ) : (
@@ -238,7 +244,7 @@ const SwapForm = () => {
               onClick={handleSwap}
               disabled={!hasOutputAmount}
             >
-              <Lock className="h-4 w-4" />
+              <LockIcon className="h-4 w-4" />
               Private Swap
             </Button>
           )}

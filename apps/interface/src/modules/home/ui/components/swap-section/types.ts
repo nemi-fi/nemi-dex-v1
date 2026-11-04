@@ -3,10 +3,10 @@ import React from "react";
 
 // Core token data from SDK
 export type Token = {
-  l2Token: L2Token; // Original token data from SDK
+  /** `undefined` for the placeholder shown until the currency list loads. */
+  l2Token: L2Token | undefined;
   id: string;
   name: string;
   symbol: string;
   logo: React.ReactElement | string;
-  usdPrice: number;
 };

@@ -22,8 +22,8 @@ type SwapContextType = {
   setPayValue: (value: string) => void;
 
   // Input refs for accessing the input elements
-  payInputRef: RefObject<HTMLInputElement>;
-  receiveInputRef: RefObject<HTMLInputElement>;
+  payInputRef: RefObject<HTMLInputElement | null>;
+  receiveInputRef: RefObject<HTMLInputElement | null>;
 
   // Token selection
   isTokenModalOpen: boolean;
@@ -43,6 +43,8 @@ type SwapContextType = {
   // Quote data
   isCalculating: boolean;
   quote: interfaceSdk.IQuote | null;
+  /** Set when the latest quote request finished without a usable quote (e.g., no liquidity). */
+  quoteError: string | null;
 };
 
 // Create context with default undefined value
@@ -65,13 +67,19 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
   // State for quote data
   const [isCalculating, setIsCalculating] = useState(false);
   const [quote, setQuote] = useState<interfaceSdk.IQuote | null>(null);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
 
   const tokenSelector = useTokenSelectorModal();
 
   // Get quote when pay amount changes
   useEffect(() => {
-    // Clear the quote if no amount or tokens
-    if (!payValue || !selectedToken || !selectedOutputToken || !account) {
+    setQuoteError(null);
+
+    const tokenIn = selectedToken.l2Token;
+    const tokenOut = selectedOutputToken.l2Token;
+
+    // Clear the quote if no amount or tokens (placeholders have no `l2Token` yet)
+    if (!payValue || !tokenIn || !tokenOut || !account) {
       setQuote(null);
       setIsCalculating(false);
       return;
@@ -93,28 +101,28 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     const getQuote = async () => {
       try {
         // Parse amount
-        const parsedAmount = sutils.parseCurrencyAmount(
-          selectedToken.l2Token,
-          payValue,
-        );
+        const parsedAmount = sutils.parseCurrencyAmount(tokenIn, payValue);
 
         const quoteResult = await lib.universalRouter.getQuote({
           account: account.address,
           amountIn: parsedAmount,
-          currencyOut: selectedOutputToken.l2Token,
+          currencyOut: tokenOut,
         });
 
         if (isStale) return;
         setQuote(quoteResult ?? null);
+        if (!quoteResult?.amountOut.greaterThan(0)) {
+          setQuoteError(
+            `Not enough liquidity to swap ${selectedToken.symbol} for ${selectedOutputToken.symbol}`,
+          );
+        }
       } catch (error) {
         console.error("Error getting quote:", error);
         if (isStale) return;
         setQuote(null);
+        setQuoteError("Unable to get a quote for this swap");
       } finally {
-        // Finish calculating with a small delay to avoid UI flicker
-        setTimeout(() => {
-          if (!isStale) setIsCalculating(false);
-        }, 300);
+        if (!isStale) setIsCalculating(false);
       }
     };
 
@@ -134,14 +142,15 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     // Clear input values and quote
     setPayValue("");
     setQuote(null);
+    setQuoteError(null);
   };
 
   // Create context value
   const contextValue: SwapContextType = {
     payValue,
     setPayValue,
-    payInputRef: payInputRef as RefObject<HTMLInputElement>,
-    receiveInputRef: receiveInputRef as RefObject<HTMLInputElement>,
+    payInputRef,
+    receiveInputRef,
     isTokenModalOpen: tokenSelector.isOpen,
     currentSelection: tokenSelector.side,
     openTokenModal: tokenSelector.open,
@@ -150,9 +159,11 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     handleNumericInput: handleAmountKeyDown,
     isCalculating,
     quote,
+    quoteError,
     resetSwapForm: () => {
       setPayValue("");
       setQuote(null);
+      setQuoteError(null);
     },
   };
 

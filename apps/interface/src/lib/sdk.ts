@@ -1,5 +1,6 @@
 import { interfaceSdk } from "@nemi-fi/interface-sdk";
 import { sutils } from "@nemi-fi/utils";
+import { CHAIN_STORAGE_KEY, defaultChainName } from "./chain-name.js";
 import { toast } from "./toast.js";
 
 export function createLib({ chain }: { chain: sutils.SupportedAvmChains }) {
@@ -15,8 +16,11 @@ export function createLib({ chain }: { chain: sutils.SupportedAvmChains }) {
   };
 }
 
-const defaultChainName = "testnet";
-const aztec = new interfaceSdk.AztecService("chainName-v4", defaultChainName);
+// staging and preview deploys set VITE_AZTEC_CHAIN=testnet (see lib/chain-name.ts)
+const aztec = new interfaceSdk.AztecService(
+  CHAIN_STORAGE_KEY,
+  defaultChainName(),
+);
 
 export const lib = {
   ...createLib(aztec),

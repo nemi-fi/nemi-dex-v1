@@ -1,17 +1,68 @@
+import { getUsdPrice, useUsdPrices } from "#/lib/prices.js";
 import { cn } from "#/lib/utils.js";
 import { SiTelegram } from "@icons-pack/react-simple-icons";
 import { sutils } from "@nemi-fi/utils";
-import { Shield, ShieldAlert } from "lucide-react";
+import { ShieldIcon, ShieldWarningIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, type CSSProperties } from "react";
 import { Link } from "react-router";
 
 type Swap = { name: string; amountIn: string; amountOut: string };
 
-const SWAPS: Swap[] = [
-  { name: "vitalik.eth", amountIn: "1 ETH", amountOut: "4000 USDC" },
-  { name: "Coinbase", amountIn: "50 BTC", amountOut: "1250 ETH" },
-  { name: "You", amountIn: "1000 DAI", amountOut: "0.01 BTC" },
+type ExampleSwap = {
+  name: string;
+  amountIn: number;
+  symbolIn: string;
+  symbolOut: string;
+  /** Output shown before live prices load (and on the server), from roughly current prices. */
+  fallbackAmountOut: number;
+};
+
+const EXAMPLE_SWAPS: ExampleSwap[] = [
+  {
+    name: "vitalik.eth",
+    amountIn: 1,
+    symbolIn: "ETH",
+    symbolOut: "USDC",
+    fallbackAmountOut: 2250,
+  },
+  {
+    name: "Coinbase",
+    amountIn: 50,
+    symbolIn: "BTC",
+    symbolOut: "ETH",
+    fallbackAmountOut: 1711,
+  },
+  {
+    name: "You",
+    amountIn: 1000,
+    symbolIn: "DAI",
+    symbolOut: "BTC",
+    fallbackAmountOut: 0.013,
+  },
 ];
+
+/** `2254.16` -> `"2254"`, `0.0129953` -> `"0.013"`: 4 significant digits, no trailing zeros. */
+function formatExampleAmount(value: number): string {
+  return String(Number(value.toPrecision(4)));
+}
+
+/** The example swaps, with each output amount priced at the live USD prices when available. */
+function useExampleSwaps(): Swap[] {
+  const { data: prices } = useUsdPrices();
+  return EXAMPLE_SWAPS.map((swap) => {
+    const priceIn = getUsdPrice(prices, swap.symbolIn);
+    const priceOut = getUsdPrice(prices, swap.symbolOut);
+    const amountOut =
+      priceIn && priceOut
+        ? (swap.amountIn * priceIn) / priceOut
+        : swap.fallbackAmountOut;
+    return {
+      name: swap.name,
+      amountIn: `${formatExampleAmount(swap.amountIn)} ${swap.symbolIn}`,
+      amountOut: `${formatExampleAmount(amountOut)} ${swap.symbolOut}`,
+    };
+  });
+}
 
 /** Sweep speed: 30% of the width per second, so a full 0 → 100 sweep takes this long. */
 const FULL_SWEEP_MS = (100 / 30) * 1000;
@@ -73,6 +124,7 @@ const INITIAL_STYLES = {
 const clamp = (p: number) => Math.min(100, Math.max(0, p));
 
 export function PrivacyInAction() {
+  const swaps = useExampleSwaps();
   const areaRef = useRef<HTMLDivElement>(null);
   const windowRef = useRef<HTMLDivElement>(null);
   const windowContentRef = useRef<HTMLDivElement>(null);
@@ -313,7 +365,7 @@ export function PrivacyInAction() {
         </p>
 
         <ul className="sr-only">
-          {SWAPS.map((swap) => (
+          {swaps.map((swap) => (
             <li key={swap.name}>
               {swap.name} swapped {swap.amountIn} for {swap.amountOut}; on Nemi
               this swap is private.
@@ -334,7 +386,7 @@ export function PrivacyInAction() {
           className="relative mt-4 touch-pan-y overflow-hidden rounded-2xl bg-card outline-none select-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-card"
         >
           {/* Exposed layer: in normal flow, gives the area its height */}
-          <SwapRows variant="exposed" />
+          <SwapRows swaps={swaps} variant="exposed" />
 
           {/* Private layer: sliding window covering the left p% of the area */}
           <div
@@ -349,7 +401,7 @@ export function PrivacyInAction() {
               style={INITIAL_STYLES.windowContent}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent dark:from-black/30" />
-              <SwapRows variant="private" className="relative" />
+              <SwapRows swaps={swaps} variant="private" className="relative" />
             </div>
           </div>
 
@@ -366,7 +418,7 @@ export function PrivacyInAction() {
               className={cn(labelClassName, "right-full mr-2 bg-green-600")}
               style={INITIAL_STYLES.privateLabel}
             >
-              <Shield className="size-3 md:size-4" />
+              <ShieldIcon className="size-3 md:size-4" />
               Private
             </div>
             <div
@@ -374,7 +426,7 @@ export function PrivacyInAction() {
               className={cn(labelClassName, "left-full ml-2 bg-red-500")}
               style={INITIAL_STYLES.exposedLabel}
             >
-              <ShieldAlert className="size-3 md:size-4" />
+              <ShieldWarningIcon className="size-3 md:size-4" />
               Exposed
             </div>
           </div>
@@ -403,9 +455,11 @@ const labelClassName =
   "absolute top-2 flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider whitespace-nowrap text-white uppercase shadow-sm sm:text-xs md:top-3 md:px-3 md:py-1 md:text-sm";
 
 function SwapRows({
+  swaps,
   variant,
   className,
 }: {
+  swaps: Swap[];
   variant: "private" | "exposed";
   className?: string;
 }) {
@@ -415,7 +469,7 @@ function SwapRows({
       aria-hidden="true"
       className={cn("flex flex-col gap-2 px-2 pt-10 pb-3 md:pt-14", className)}
     >
-      {SWAPS.map((swap) => (
+      {swaps.map((swap) => (
         <SwapRow key={swap.name} swap={swap} variant={variant} />
       ))}
     </div>
@@ -441,9 +495,9 @@ function SwapRow({
       )}
     >
       {isPrivate ? (
-        <Shield className="size-4 shrink-0 text-green-600 md:size-5" />
+        <ShieldIcon className="size-4 shrink-0 text-green-600 md:size-5" />
       ) : (
-        <ShieldAlert className="size-4 shrink-0 text-red-500 md:size-5" />
+        <ShieldWarningIcon className="size-4 shrink-0 text-red-500 md:size-5" />
       )}
       <span>
         <Secret text={swap.name} hidden={isPrivate} /> swapped{" "}

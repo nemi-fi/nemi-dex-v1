@@ -1,5 +1,8 @@
 import type { CallIntent } from "@aztec-labs/aztec.js/authorization";
-import type { Contract } from "@aztec-labs/aztec.js/contracts";
+import type {
+  Contract,
+  ContractFunctionInteraction,
+} from "@aztec-labs/aztec.js/contracts";
 import type { FeePaymentMethod } from "@aztec-labs/aztec.js/fee";
 import type { AccountManager, Wallet } from "@aztec-labs/aztec.js/wallet";
 import { readDeploymentJsonFiles } from "@nemi-fi/aztec-deploy/client";
@@ -57,14 +60,14 @@ export class CoreService {
 
   // TODO(security): remove this as it can be accidentally used to receive funds
   getReadonlyAccount = sutils.lazyValue(async () => {
-    const { Fq, Fr } = await import("@aztec-labs/aztec.js/fields");
-    const wallet = await this.getTestWallet();
-    const manager = await wallet.createSchnorrAccount(
+    const { Fr } = await import("@aztec-labs/aztec.js/fields");
+    const { getSingleKeyAccount } = await import("../utils.ts");
+    const manager = await getSingleKeyAccount(
+      await this.getTestWallet(),
       new Fr(123),
-      new Fr(0), //salt
-      new Fq(123), // signing key, explicit since Aztec v5
+      "readonly",
     );
-    const account = await this.ensureAccountDeployed(manager);
+    const account = await sutils.registerAccount(manager);
 
     // TODO
     // account.sendTransaction = (): never => {
@@ -76,6 +79,9 @@ export class CoreService {
   });
 
   getSponsoredFeePaymentMethod = sutils.lazyValue(async () => {
+    if (!sutils.isTestnet(this.chain.id)) {
+      return undefined;
+    }
     const { MySponsoredFeePaymentMethod } = await import("../sponsored_fpc.ts");
     return await MySponsoredFeePaymentMethod.preDeployed(
       await this.getTestWallet(),
@@ -102,6 +108,19 @@ export class CoreService {
    */
   getTestWallet = sutils.lazyValue(async () => {
     return await sutils.createIsomorphicTestWallet(await this.aztecNode());
+  });
+
+  /**
+   * Reads public state by simulating `interaction` directly on the node. Faster than
+   * `interaction.simulate()` because it skips the wallet (PXE sync, fee estimation, account).
+   */
+  async simulatePublic(interaction: ContractFunctionInteraction) {
+    const simulator = await this.#publicCallsSimulator();
+    return await simulator.simulatePublic(interaction);
+  }
+
+  #publicCallsSimulator = sutils.lazyValue(async () => {
+    return new sutils.PublicCallsSimulator(await this.aztecNode());
   });
 
   /**

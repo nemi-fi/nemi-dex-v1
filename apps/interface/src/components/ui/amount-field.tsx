@@ -1,6 +1,6 @@
 import { Skeleton } from "#/components/ui/skeleton.js";
 import { cn } from "#/lib/utils.js";
-import { ArrowDownUp, ChevronDown } from "lucide-react";
+import { ArrowsDownUpIcon, CaretDownIcon } from "@phosphor-icons/react";
 import type * as React from "react";
 
 export function FieldLabel({
@@ -75,7 +75,7 @@ export function TokenPill({
       )}
       <span className="max-w-[90px] truncate">{symbol || "Select"}</span>
       {showChevron && (
-        <ChevronDown className="h-4 w-4 shrink-0 dark:text-gray-400" />
+        <CaretDownIcon className="h-4 w-4 shrink-0 dark:text-gray-400" />
       )}
     </button>
   );
@@ -83,7 +83,7 @@ export function TokenPill({
 
 /** Square badge between two amount fields; a button when `onClick` is given. */
 export function FieldDivider({
-  icon = <ArrowDownUp className="h-[18px] w-[18px]" />,
+  icon = <ArrowsDownUpIcon className="h-[18px] w-[18px]" />,
   onClick,
   label,
 }: {

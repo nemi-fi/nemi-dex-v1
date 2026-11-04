@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "agentGuidance": false,
   "globalEnv": ["!VERCEL_TARGET_ENV"],
   "tasks": {
     "//#install-deps": {
@@ -51,7 +52,7 @@
       "dependsOn": ["^bootstrap", "bootstrap"],
       "cache": false,
       // apps/interface builds for Vercel instead of Cloudflare when this is set
-      "passThroughEnv": ["VERCEL"],
+      "passThroughEnv": ["VERCEL", "VITE_AZTEC_CHAIN"],
     },
     "start": {
       "dependsOn": ["^bootstrap", "bootstrap"],

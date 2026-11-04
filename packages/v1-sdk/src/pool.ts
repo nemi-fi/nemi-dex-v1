@@ -41,15 +41,11 @@ export class Pool {
     currencyAmountB: CurrencyAmount<L2Token>,
   ) {
     this.poolId = poolId;
-    const tokenAmounts = currencyAmountA.currency.sortsBefore(
+    this.tokenAmounts = currencyAmountA.currency.sortsBefore(
       currencyAmountB.currency,
     ) // does safety checks
       ? [currencyAmountA, currencyAmountB]
       : [currencyAmountB, currencyAmountA];
-    this.tokenAmounts = tokenAmounts as [
-      CurrencyAmount<L2Token>,
-      CurrencyAmount<L2Token>,
-    ];
   }
 
   static async new(

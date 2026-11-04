@@ -12,44 +12,45 @@ import { createExtendedL1Client } from "@aztec-labs/ethereum/client";
 import { retryUntil } from "@aztec-labs/foundation/retry";
 import { sutils } from "@nemi-fi/utils";
 import { Hex } from "ox";
-import { assert } from "ts-essentials";
 import type { Account } from "../sdk.js";
-
-const AMOUNT = 1000000000000000000000n;
+import {
+  getDeployConfig,
+  type DeployConfig,
+} from "../scripts/deploy/deploy-config.js";
 
 /** Generous, because on a network settling on a real L1 inclusion can take many minutes. */
 const L1_TO_L2_MESSAGE_TIMEOUT_SECONDS = 30 * 60;
 
-const anvilPrivateKey =
-  "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6";
-
-type FaucetParams = {
+export async function faucet({
+  aztecNode,
+}: {
   aztecNode: sutils.EnhancedAztecNode<sutils.SupportedAvmChains>;
-};
-
-export async function faucet(params: FaucetParams) {
-  const privateKey = getPrivateKeyByChain(params.aztecNode.chain);
-  const aztecPrivateKey = Hex.concat("0x00", Hex.slice(privateKey, 1));
-  const wallet = await sutils.createIsomorphicTestWallet(params.aztecNode);
+}) {
+  const config = getDeployConfig(aztecNode.chain.id);
+  const aztecPrivateKey = Hex.concat(
+    "0x00",
+    Hex.slice(config.deployerPrivateKey, 1),
+  );
+  const wallet = await sutils.createIsomorphicTestWallet(aztecNode);
   const accountManager = await wallet.createSchnorrAccount(
     Fr.fromString(aztecPrivateKey),
     new Fr(0), // salt
     Fq.fromString(aztecPrivateKey),
   );
   if (
-    (await getFeeJuiceBalance(accountManager.address, params.aztecNode)) >
-    AMOUNT / 2n
+    (await getFeeJuiceBalance(accountManager.address, aztecNode)) >
+    config.feeJuiceBridgeAmount / 2n
   ) {
     console.log("using existing account");
     return await sutils.registerAccount(accountManager);
   }
 
   console.log("minting & bridging...");
-  const portal = await getPortal(params);
+  const portal = await getPortal(aztecNode, config);
   const claim = await portal.bridgeTokensPublic(
     accountManager.address,
-    AMOUNT,
-    true /* mint */,
+    config.feeJuiceBridgeAmount,
+    sutils.isTestnet(aztecNode.chain.id) /* mint */,
   );
   console.log("claim", claim);
   const paymentMethod = new FeeJuicePaymentMethodWithClaim(
@@ -57,12 +58,12 @@ export async function faucet(params: FaucetParams) {
     claim,
   );
 
-  await waitForL1ToL2Message(params.aztecNode, claim.messageHash);
+  await waitForL1ToL2Message(aztecNode, claim.messageHash);
 
   console.log("deploying account...");
   const account = sutils.ensureAccountDeployed(
     accountManager,
-    params.aztecNode,
+    aztecNode,
     paymentMethod,
   );
   return account;
@@ -75,16 +76,22 @@ export async function faucetTo({
 }: {
   to: AztecAddress;
   account: Account;
-} & FaucetParams) {
+  aztecNode: sutils.EnhancedAztecNode<sutils.SupportedAvmChains>;
+}) {
+  const config = getDeployConfig(aztecNode.chain.id);
   const bal = await getFeeJuiceBalance(to, aztecNode);
-  if (bal > AMOUNT / 2n) {
+  if (bal > config.feeJuiceBridgeAmount / 2n) {
     console.log(`fee juice balance of ${to} is sufficient (${bal})`);
     return;
   }
 
   console.log(`minting & bridging fee juice to ${to}...`);
-  const portal = await getPortal({ aztecNode });
-  const claim = await portal.bridgeTokensPublic(to, AMOUNT, true /* mint */);
+  const portal = await getPortal(aztecNode, config);
+  const claim = await portal.bridgeTokensPublic(
+    to,
+    config.feeJuiceBridgeAmount,
+    sutils.isTestnet(aztecNode.chain.id) /* mint */,
+  );
 
   await waitForL1ToL2Message(aztecNode, claim.messageHash);
 
@@ -96,13 +103,16 @@ export async function faucetTo({
   await waitForTx(aztecNode, txHash, { timeout: sutils.AZTEC_TX_WAIT_TIMEOUT });
 }
 
-async function getPortal({ aztecNode }: FaucetParams) {
+async function getPortal(
+  aztecNode: sutils.EnhancedAztecNode<sutils.SupportedAvmChains>,
+  config: DeployConfig,
+) {
   const { l1ChainId } = await aztecNode.getNodeInfo();
   const l1Url = sutils.l1RpcUrls[aztecNode.chain.id];
   const l1Chain = createEthereumChain([l1Url], l1ChainId);
   const extendedClient = createExtendedL1Client(
     l1Chain.rpcUrls,
-    getPrivateKeyByChain(aztecNode.chain),
+    config.deployerPrivateKey,
     l1Chain.chainInfo,
   );
 
@@ -141,17 +151,4 @@ async function waitForL1ToL2Message(
     5 /* poll interval, seconds */,
   );
   console.log("L1 to L2 message is available on L2");
-}
-
-function getPrivateKeyByChain(chain: sutils.SupportedAvmChains) {
-  if (chain.id === sutils.supportedAvmChains.localNetwork.id) {
-    return anvilPrivateKey;
-  }
-
-  const sepoliaPrivateKey = process.env.SEPOLIA_PRIVATE_KEY;
-  assert(
-    typeof sepoliaPrivateKey === "string",
-    "SEPOLIA_PRIVATE_KEY is not set",
-  );
-  return sepoliaPrivateKey as Hex.Hex;
 }

@@ -7,7 +7,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { type Token } from "./types.js";
@@ -30,17 +29,15 @@ const convertToToken = (l2Token: L2Token): Token => ({
   name: l2Token.name || l2Token.symbol || "Unknown",
   symbol: l2Token.symbol || "???",
   logo: <TokenIcon token={l2Token} />,
-  usdPrice: 0, // Default price - this would need to be fetched
 });
 
 /** Stand-in shown until the currency list loads. */
 const placeholderToken = (symbol: string): Token => ({
-  l2Token: {} as L2Token,
+  l2Token: undefined,
   id: symbol,
   name: symbol,
   symbol,
   logo: <TokenIcon token={{ symbol, name: symbol }} />,
-  usdPrice: 0,
 });
 
 const PLACEHOLDER_A = placeholderToken("DEF");
@@ -63,9 +60,6 @@ export const TokenProvider = ({
   const tokens = useMemo(() => currencies.map(convertToToken), [currencies]);
   const isTokensLoading = tokens.length === 0;
 
-  // Set while swapping so the "same token on both sides" guard doesn't block the swap
-  const isSwappingRef = useRef(false);
-
   const [selectedToken, setSelectedToken] = useState<Token>(PLACEHOLDER_A);
   const [selectedOutputToken, setSelectedOutputToken] =
     useState<Token>(PLACEHOLDER_B);
@@ -77,7 +71,7 @@ export const TokenProvider = ({
     const findByAddress = (address: string | undefined) =>
       address
         ? tokens.find(
-            (t) => t.l2Token.address.toLowerCase() === address.toLowerCase(),
+            (t) => t.l2Token?.address.toLowerCase() === address.toLowerCase(),
           )
         : undefined;
 
@@ -100,7 +94,7 @@ export const TokenProvider = ({
   }, [tokens, initialTokenAddresses]);
 
   const handleSetSelectedToken = (token: Token) => {
-    if (!isSwappingRef.current && token.id === selectedOutputToken.id) {
+    if (token.id === selectedOutputToken.id) {
       console.warn("Cannot select the same token for both input and output");
       return;
     }
@@ -108,7 +102,7 @@ export const TokenProvider = ({
   };
 
   const handleSetSelectedOutputToken = (token: Token) => {
-    if (!isSwappingRef.current && token.id === selectedToken.id) {
+    if (token.id === selectedToken.id) {
       console.warn("Cannot select the same token for both input and output");
       return;
     }
@@ -116,14 +110,8 @@ export const TokenProvider = ({
   };
 
   const swapTokens = () => {
-    if (isSwappingRef.current) return;
-    isSwappingRef.current = true;
     setSelectedToken(selectedOutputToken);
     setSelectedOutputToken(selectedToken);
-    // Let the state updates land before re-enabling the guard
-    setTimeout(() => {
-      isSwappingRef.current = false;
-    }, 100);
   };
 
   return (
